@@ -1,0 +1,451 @@
+Indice
+    - Tiene punteros a los documentos / información
+    - Clave para acceder a la información - DICCIONARIO
+    - Orden
+
+Libro
+    Recetas de cocina
+    Personajes de Starwars
+
+Recetas de cocina. Según se me ocurren recetas, las escribo. Está desordenadas
+    Tortilla de patatas
+    Cocido
+    Fabes con chorizo
+    Cordero asado
+
+Quiero hacer una búsqueda de una serie de Recetas
+    Voy receta por receta
+        Eficiente? NO
+            Programación: Algoritmo de Orden (n)
+            Full scan
+
+Qué podría hacer para que la búsqueda fuera más eficiente?
+    Diccionario. Los términos aparecen en orden
+    Es esto una ventaja? (El orden?)
+        Búsqueda binaria. Algoritmo de Orden log(n)
+
+1.000.000
+  500.000
+  250.000
+  125.000
+   62.500
+   32.000
+   16.000
+    8.000
+    4.000
+    2.000
+    1.000
+      500
+      250
+      125
+       65
+       33
+       17
+        9
+        5
+        3
+        2
+        1
+
+Con solo 27 operaciones encuentro algo
+    Las bases de datos generan/recopilan ESTADISTICAS 
+
+Qué ventaja tienen guardar los datos ordenados?
+    Búsqueda más rápida
+Qué inconveniente tiene guardar los datos ordenados?
+    Más tiempo en las altas, por qué? 
+        Porque hay que buscar dónde lo pongo. <<<< Este no es mucho problema.
+                                            Porque la Búsqueda es muy rápida.
+        Le tengo que hacer HUECO. Implica mover todo lo que hay detrás.
+            PROBLEMON !!!!!!
+        Fichero (más o menos): Secuencia ordenada de bytes.
+
+Si no guardo los datos ordenados , sino según se me ocurren:
+    Ventajas?
+        Las altas son MUY RAPIDAS
+    Inconveniente?
+        Búsquedas... son muy lentas
+        Bajas y modificaciones también lentas >>> porque implican una búsqueda
+
+Índices <<<< Objetivo es mejorar el rendimiento de la búsqueda
+    Ventajas: 
+        Hacer búsquedas muy rápidas
+        Pero permiten hacer altas y actualizaciones a mayor velocidad que 
+            si los datos están ordenados
+
+Indice?
+    Estructura de datos que tiene la información ordenada permitiendo mejorar las búsquedas
+    Qué información tiene ordenada?
+        Las claves, los términos que quiero buscar
+    Asociado a cada término que quiero buscar que guardo?
+        Un puntero a la ubicación de ese elemento (localización)
+    Qué estructura interna tiene un índice?
+        Árbol, estructura jerárquica B-tree <<<< Bases de datos
+    El índice al final acaba en un fichero
+
+Ejemplo:
+    A
+        ab
+            ábaco
+            abanico << 41, 67, 98
+        ac
+        ...
+    B
+    C
+
+Esto nos mejora las búsquedas.
+Inconvenientes de los índices?
+    Mantenerlos: Un alta. Lo mejoran un poco
+        Lo que hay que mover es menos
+    Para conseguir mover aún menos información o incluso NO MOVERLA
+        Los índices (a bajo nivel... en sus ficheros) se guardan con 
+            UN MONTON DE HUECOS
+
+Quiero meter el 23456
+Quiero meter el 23457
+11111
+
+12112
+
+13123
+
+23456<<<
+
+23457<<<
+
+45345
+
+54321
+
+67545
+
+78764
+    Así funcionan las bases de datos. CON UN FACTOR DE RELLENO(% DE BLANCOS)
+                                        90%
+Problema: ESPACIO
+Mantenimiento: De vez en cuando tengo que REGENERAR LOS INDICES
+    Esto es trabajo de los DBAs 
+
+ASI NO FUNCIONA ELASTIC SEARCH
+Elastic search lo que hace es ir cerrando ficheros de índices y genera nuevos
+En elastic un "INDICE" está compuesto de MUUUUUUUUUCHOS ficheros
+Es decir, funciona de manera similar a cómo se guardan los datos en una base de datos
+Al hacer una búsqueda, no obstante lo que hace elastic es leer todos esos ficheros del HDD
+  y cargarlos en memoria de forma consolidada. <<<< ESO NO ES RAPIDO
+Esto es algo que tendremos que controlar:
+    - De vez en cuando aunar ficheros
+    - En lo posible, voy a querer tener los datos en la memoria precargados
+
+-------------------
+Nº pagina       Titulo                  Detalle
+1               Tortilla de patatas     MUCHO
+2               Cocido                  MUCHO
+3               Fabes con chorizo       MUCHO
+4               Cordero asado           MUCHO
+5               Tortilla de chorizo     MUCHO
+6               Cordero cocido          MUCHO
+7               cocido                  MUCHO
+------------------
+Quiero hacer búsqueda eficiente sobre los títulos. Estrategias?
+    - Tener las recetas ordenadas... Pero esto provocaría que si quiero recetas 
+        nuevas... aquello vaya lento
+    - Crear un índice: Copia ordenada de los términos (SOLO DE LOS TERMINOS):
+            Términos                    Ubicación
+            -------------------------------------
+            cocido                      7
+            Cocido                      2
+            Cordero asado               4
+            Cordero cocido              6
+            Fabes con chorizo           3
+            Tortilla de chorizo         5
+            Tortilla de patatas         1
+
+BUSQUEDAS 
+    1 - Tortilla de patatas  - Qué tal funciona? GUAY
+    2 - Cocido               - Qué tal funciona? 
+            2 Resultados: NI DE COÑA !!!!!!
+                SOLO hay 1 término que sea Cocido  <<<< SOLO TENGO ESE RESULTADO
+    3 - ocido = chorizo
+            # de resultados?
+                ESTO DA CERO RESULTADOS
+    4 - WHERE UPPER(titulo) LIKE UPPER("%cocido%") 
+            /// Que el titulo CONTENGA chorizo, da igual EL CASE
+            Devuelve 2
+        Si hago esa búsqueda, qué ocurre por dentro?
+        ¿Cómo se hace esa búsqueda? >>>> FULL SCAN
+            Para que sirve el índice en este caso?
+                PARA NADA !!!!!
+Si voy a hacer búsquedas EXACTAS de términos, esto va bien....
+El problema viene cuando NO HAGO BUSQUEDAS EXACTAS... PROBLEMON !!!!
+    Oracle Database - Oracle Text
+    Indexación de textos SQL Server
+
+ELASTIC SEARCH y OTROS MOTORES DE INDEXACION
+    SOLR, basados en LUCENE
+Usan LUCENE para otro tipo de indexación DIFERENTE
+
+INDICES INVERTIDOS
+LUCENE sigue un proceso de indexación, por fases:
+    1º filtrar determinados caracteres ¿Quieres trabajar con acentos? NO
+        cocido (estilo casero)      
+        Cocido                      
+        Cordero asado               
+        Cordero cocido              
+        Fabes con chorizo           
+        Tortilla de atun            <<<<<
+        Tortilla de chorizo         
+        Tortilla de patatas         
+    2º extraer tokens
+        cocido-estilo-casero        
+        Cocido                      
+        Cordero-asado               
+        Cordero-cocido              
+        Fabes-con-chorizo           
+        Tortilla-de-atun            
+        Tortilla-de-chorizo         
+        Tortilla-de-patatas       
+    3º Normalizar CASE  ¿Quieres hacer búsquedas que distingan case? NO
+        cocido-estilo-casero        
+        cocido                      
+        cordero-asado               
+        cordero-cocido              
+        fabes-con-chorizo           
+        tortilla-de-atun            
+        tortilla-de-chorizo         
+        tortilla-de-patatas       
+    4º Todos los términos te aportan? O hay tokens que los puedo despreciar
+        1 cocido-estilo-casero        
+        2 cocido                      
+        3 cordero-asado               
+        4 cordero-cocido              
+        5 fabes-*-chorizo           
+        6 tortilla-*-atun            
+        7 tortilla-*-chorizo         
+        8 tortilla-*-patatas      
+    5º Quita los plurales
+    5º Se quede con la RAIZ de las palabras
+-------------
+asad            3(2)
+atun            6(3)
+caser           1(3)
+choriz          5(3) 7(3)
+cocid           1 2 4
+corder          3 4
+estil           1
+fab             5
+patat           8
+tort            6 7 8
+
+-------
+QUERY: tortilla de patatas
+Qué hace Lucene para hacer la búsqueda??
+    Lucene va a aplicar al la query de búsqueda el MISMO PROCEDIMIENTO
+        que se aplica en la carga de datos (INDEXACION)
+LUCENE tortilla-de-patatas
+LUCENE tortilla-*-patatas
+LUCENE tort, patat
+    Mejor resultado: 8, otros resultados 6, 7
+        Los resultados se devuelven ORDENADOS por RELEVANCIA
+
+QUIEN FUNCIONA MAS O MENOS ASI???
+    GOOGLE
+
+-----------
+1º Si yo le digo a ELASTIC (>>> Lucene):
+    INDEXA EL DOCUMENTO CON TITULO: Tortilla de patatas --- 127654
+    Qué guarda él en el índice?
+        tort  127654 (1)
+        patat 127654 (3)
+    Puedo recuperar el documento original desde esa información?
+        Puedo recuperar la ubicación.. pero no el CONTENIDO
+
+NO OBSTANTE !!!!!
+    Elastic Search SI PERMITE el amacenar una COPIA 
+        del documento en el momento de su INDEXACION.
+    Esto no lo hace LUCENE... Lo hace elasticsearch
+
+Qué pasa si el dato se cambia en su BBDD origen?
+    Hay que volver a indexar el documento...
+    Por que si no? Tengo información desactualizada.
+
+Qué tarda más? Dar de alta el documento en una BBDD o indexarlo?
+    INDEXARLO TANDA INFINITAS VECES MAS !!!!!
+Darlo de alta en la BBDD es escribir unos BYTES al final de un fichero
+    4 ms 10 ms
+Indexarlo... Toma ese documento, lee todos los CARACTERES !!!!
+
+
+
+BYTES >>> CARACTERES??? JUEGO DE CARACTERES (mapeo... Secuacia de bytes >>> Caracter)
+                                                    01011101111101101 >>> A 
+           LOS TENGO QUE ANALIZAR Y TRANSFORMAR 
+
+BBDD - ALMACENAR                        Lento            rápido
+                                        vvvvvv           vvvvv 
+En la indexación llevo el tiempo de la búsqueda a la carga de datos.    
+                                        ^^^^^^           ^^^^^^
+INDEXAR  (asíncrono)                    RAPIDA          TIEMPO GRANDE
+
+
+PREGUNTA???
+    Conoceis algun tipo de datos.... de uso MUY HABITUAL... 
+    que sean DATOS MUERTOS?
+        Que no se vayan a volver a actualizar NUNCA MAIS !
+        Datos de ficheros de LOG <<<<< TIMESTAMP - EVENTO
+
+    Los EVENTOS que se anotan en los LOGS son datos muertos.
+        NO VAN A CAMBIAR EN LA VIDA
+    
+    Aquí no hay peligro de que el dato quede desactualizado.
+    Tiene sentido guardar aparte el evento en una BBDD ??
+        o me vale con la copia en cache dentro de ELASTIC ?
+            ME VALE <<<<< GUAY... voy a utilizar ElasticSearch 
+                                    como repositorio de eventos
+
+    Tienen los logs información estructurada, como las BBDD??
+        Una parte (fecha... servidor.... usuarios...)
+        Pero otra no... Son mensajes de texto
+
+
+---------------
+ELASTIC QUE TIPOS DE DOCUMENTOS CREEIS QUE PERMITE INDEXAR?
+- HTML 100% SI
+- XML  100% SI
+- DOCX 50%  
+- PDF  50%
+Habeis fallado Todos
+ELASTIC SOLO PERMITE INDEXAR DOCUMENTOS JSON
+
+
+Entonces... prácticamente no voy a encontrar nada cuyo origen sea JSON
+Siempre (casi siempre) voy a necesitar transformar el dato en origen a JSON
+    ¿Quién se encarga de eso GUAY? LOGSTASH
+
+Stack ELK. Elastic-Logstash-Kibana
+    Logstash >>>> Elastic <<<< Kibana
+    Fluend
+    Beats - Elastic
+        HeartBeat  - Monitorizar servicios
+        Filebeat   - Monitorizar ficheros
+        AuditBeat  - Monitorizar el journal de Linux
+        Winlogbeat - Monitorizar el registro de eventos de windows
+        MetricBeat - Monitar recursos de Hardware
+
+Monitorización 
+    Beats >>>> Kafka >>>> Logstash >>>> Kafka >>>>> Elastic <<<< Kibana
+Kafka: Sistema de mensajería (colas): ASINCRONISMO (Garantizar entrega de mensajes)
+
+Monitorización mediante el stack ELK
+Elastic Developer
+Kibana
+Kafka
+
+
+----------------
+Dentro de un Elastisearch, con cuántos índices voy a acabar?
+- Pocos índices con muchos shards    
+- Muchos índices con pocos shards    **
+- Pocos índices con pocos shards   
+- Muchos índices con muchos shards   **  <<<<<<<<<
+
+Estoy guardando los logs de unos servidores web 5.
+    - MUCHOS INDICES
+        Indice unico para los 5
+        Indice por sevidor
+        ....
+A elastic le gusta MUCHO tener indices asociados a FECHAS
+
+    LogsEnero2021
+        LogsEnero2021 Servidor1
+        LogsEnero2021 Servidor2
+        LogsEnero2021 Servidor3
+    LogsFebrero2021
+    LogsMarzo2021
+-------
+    Log01012021
+    Log02012021
+
+Cada índice le voy a hacer particiones.
+    Para qué?
+        Paralelización de la carga de trabajo. Tener más "personas" trabajando
+            sobre el índice. SHARDS <<<<                   Lucene (es un proceso independiente a nivel de SO)
+
+LogsEnero2021 1 fragmento(partición) 1 LUCENE (instalado en una máquina)
+    Fragmento 1 <<<< Servidor1, servidor2, servidor3, sevridor4, servidor5
+Si el Lucene no da de si.... Más particiones
+
+LogsEnero2021 2 fragmentos(partición) 2 LUCENE (instalados en 2 máquinas)
+    Fragmento 1 <<<< Servidor1, servidor2, servidor3
+    Fragmento 2 <<<< servidor4, servidor5
+
+    Tendré posibilidad de definir a que SHARD quiero que vaya cada documento que cargo
+        Para ello se utiliza un algoritmo denominado: ROUTING <<<< Developer
+
+Si tu partes mucho, la indexación va a ir como un tiro! MUY RAPIDO 
+Qué pasa con las búsquedas? 
+    Más rápida ***** 
+    Más lenta               **   <<<<<<<<<<<<<<< MAS LENTA
+        Fuionar los resultados
+            Shard 1 - 220 resultados    >>>> Ordenados por relevancia
+
+            Shard 1 - 100 resultados    >>>> Ordenados por relevancia
+            Shard 2 - 120 resultados    >>>> Ordenados por relevancia
+                    ------
+                      220 resultados ... IMPLICA REORDENAR
+                                                    ^^^^^
+                                                    HORRIBLE !!!!!
+
+                        CARGA                 BUSQUEDA
+Pocos shards .....      Más Lenta             Más rápida
+Muchos shards .....     Más rápida            Más lenta
+-----------------------------------------------------------
+QUIERO LAS 2 !!!!!
+SI??? Estoy trabajando con datos MUERTOS !!!! Como los logs
+Si tengo un indice asociado a una fecha
+    Mientras estoy cargando datos en él, que me interesa:  Muchos shards
+    Cuando pasa la fecha del INDICE y por tanto LO CIERRO: Pocos shards
+
+Habrá un mínimo de shards que tenga que tener... en base a qué?
+    La cantidad de datos... Los datos del shard van a la RAM.... 
+        Si tengo 20Gbs de datos, y máquinas con 5 Gbs de RAM, 
+        tendré que hacer 4 shards. <<<< ESTO NO VA A SER TAN EXACTO
+
+EN TODO LO DE ARRIBA CUANDO DIGO SHARDS o  FRAGMENTOS o LUCENES 
+    ME REFIERO A SHARDS PRIMARIOS !!!!!
+
+Tipos de shards:
+    - PRIMARIOS
+    - REPLICAS
+
+Qué es un shard de replica?
+Una copia de los datos que tengo en un shard primario.
+De un shard primario puedo hacer ninguna o MUCHAS copias.
+
+¿Qué ventaja me da tener replicas de un shard?
+    - REDUNDANCIA ! Tolerancia a fallos en los datos. 
+    - Tiempos de carga ?? Los mejora? NO lo mejora... si acaso lo empeora.
+    - Tiempos de búsqueda? Mejoran... Tengo 2 sitios de donde leer
+        Pero cuidado.... no se lee de los 2 a la vez. O se lee de 1 o se lee de otro
+        Trabajamos en CARGA, cn muchas búsquedas en paralelo
+
+
+
+2 discos duros HDD 2x500Gb
+    RAID 0: Montar 1 único volumen con los 2 discos: 1000Gb
+        Al grabar un dato, el dato se graba 1 vez, pero con 2 agujas
+        Más velocidad de escritura   MEJORA
+        Más velocidad de lectura?    SI ACASO MEJORA. Si si en paralelo tengo 2 personas leyendo cosas que estan en un disco
+        SHARDS PRIMARIOS
+    RAID 1: Espejo: Montar 1 único volumen con los 2 discos: 500Gb
+        Uno actua de copia del otro
+        Los datos se guardan en los 2 discos - copia
+        Más velocidad de escritura?  NO, si acaso peor
+        Más velocidad de lectura: SI, tengo 2 sitios de donde leer
+        SHARDS DE REPLICA
+
+
+Si tengo un índice que está vivo, Todavia se están metiendo en él datos,
+    que me interesa MUCHAS O POCAS replicas?
+        Pocas replcias 
+Si el índice lo uso ya sólo para búsquedas
+        Muchas replicas
