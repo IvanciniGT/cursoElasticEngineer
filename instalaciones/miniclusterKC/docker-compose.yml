@@ -11,6 +11,9 @@ services:
             - cluster.name=MiniCluster
             - cluster.initial_master_nodes=nodo1,nodo2,nodo3
             - discovery.seed_hosts=nodo2,nodo3
+            - cluster.routing.allocation.disk.threshold_enabled=false
+#            - cluster.routing.allocation.disk.watermark_low
+#            - cluster.routing.allocation.disk.watermark_high
         volumes:
             - /home/ubuntu/environment/data/nodo1:/usr/share/elasticsearch/data
     nodo2:
@@ -21,6 +24,7 @@ services:
             - cluster.name=MiniCluster
             - cluster.initial_master_nodes=nodo1,nodo2,nodo3
             - discovery.seed_hosts=nodo1,nodo3
+            - cluster.routing.allocation.disk.threshold_enabled=false
         volumes:
             - /home/ubuntu/environment/data/nodo2:/usr/share/elasticsearch/data
             
@@ -32,6 +36,7 @@ services:
             - cluster.name=MiniCluster
             - cluster.initial_master_nodes=nodo1,nodo2,nodo3
             - discovery.seed_hosts=nodo1,nodo2
+            - cluster.routing.allocation.disk.threshold_enabled=false
         volumes:
             - /home/ubuntu/environment/data/nodo3:/usr/share/elasticsearch/data
                         
