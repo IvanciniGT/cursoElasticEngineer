@@ -1,0 +1,48 @@
+Prerequisitos de la instalación
+- Parametros relativos a capacidad de manejo de ficheros en el SO
+- Desactivar el swapping
+
+RAM llena
+    SO empieza a usar disco duro para colocar cosas que le hacen falta
+
+Los indices los guardo en ficheros
+Cuando queremos hacer una búsqueda Elastic sube los ficheros a RAM, y los consolida
+
+docker run -d --name es01 -e "discovery.type=single-node" elasticsearch:7.10.1
+
+    docker pull elasticsearch:7.10.1
+    docker container create --name es01 -p 8080:9200 -e "discovery.type=single-node" \
+        -v /home/ubuntu/environment/data/es01:/usr/share/elasticsearch/data elasticsearch:7.10.1
+    docker start es01
+
+elasticsearch trabaja en 2 puertos:
+    9200 - Comunicación con clientes
+    9300 - Comunicación interna en el cluster (comunicación entre los nodos)
+    
+Contenedor es01 va a tener la IP
+    172.17.0.2:9200
+Redirección:
+    0.0.0.0:8080
+        127.0.0.1:8080
+        172.17.0.1:8080
+        172.31.2.238:8080
+
+Los archicos que crea elasticsearch con los indices se generan en el filesystem del contenedor
+Qué pasa si borro el contenedor?
+    Todo eliminado = RUINA GRANDE !!!!!!!
+
+Actualizar a una nueva versión de elastic 
+    Borrar el contenedor de la version 7.10
+    Y generar uno nuevo con la version 7.11
+
+Donde se va a ejecutar normalmente el contenedor? Cluster (Kubernetes, Openshift)
+
+Montar un volumen:
+    Compartir una carpeta/archivo entre el FS del host y el FS del contenedor
+En el caso de ES la ruta donde se guardan los datos dentro del contenedor es /usr/share/elasticsearch/data
+
+
+
+Nodo1 - nodo2, nodo3
+Nodo2 - nodo3
+Nodo3

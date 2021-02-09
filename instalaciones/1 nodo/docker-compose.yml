@@ -1,0 +1,12 @@
+version: "3.0"
+
+services:
+    es01:
+        container_name: es01
+        image: elasticsearch:7.10.1
+        ports:
+            - 8080:9200 
+        environment:
+            - discovery.type=single-node
+        volumes:
+            - /home/ubuntu/environment/data/es01:/usr/share/elasticsearch/data 
