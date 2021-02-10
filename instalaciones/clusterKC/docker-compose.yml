@@ -6,6 +6,8 @@ version: "3.0"
 # 2 coordinadores
 # Kibana y cerebro
 
+
+# xpack
 services:
     maestro1:
         container_name: maestro1
@@ -19,6 +21,10 @@ services:
             - node.roles=master
 #            - cluster.routing.allocation.disk.watermark_low
 #            - cluster.routing.allocation.disk.watermark_high
+            #- xpack.license.self_generated.type=basic
+            - xpack.license.self_generated.type=trial
+            - xpack.security.enabled=true
+            - ELASTIC_PASSWORD=password
         volumes:
             - /home/ubuntu/environment/data/nodo1:/usr/share/elasticsearch/data
 
@@ -32,6 +38,9 @@ services:
             - discovery.seed_hosts=maestro1, datos1
             - cluster.routing.allocation.disk.threshold_enabled=false
             - node.roles=master
+            - xpack.license.self_generated.type=trial
+            - xpack.security.enabled=true
+            - ELASTIC_PASSWORD=password
         volumes:
             - /home/ubuntu/environment/data/nodo2:/usr/share/elasticsearch/data
     
@@ -43,6 +52,9 @@ services:
             - cluster.name=Cluster
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=data,master,voting_only
+            - xpack.license.self_generated.type=trial
+            - xpack.security.enabled=true
+            - ELASTIC_PASSWORD=password
         volumes:
             - /home/ubuntu/environment/data/nodo3:/usr/share/elasticsearch/data
     
@@ -54,6 +66,9 @@ services:
             - cluster.name=Cluster
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=data
+            - xpack.license.self_generated.type=trial
+            - xpack.security.enabled=true
+            - ELASTIC_PASSWORD=password
         volumes:
             - /home/ubuntu/environment/data/nodo4:/usr/share/elasticsearch/data
     
@@ -65,8 +80,25 @@ services:
             - cluster.name=Cluster
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=data
+            - xpack.license.self_generated.type=trial
+            - xpack.security.enabled=true
+            - ELASTIC_PASSWORD=password
         volumes:
             - /home/ubuntu/environment/data/nodo5:/usr/share/elasticsearch/data
+    
+    datos4:
+        container_name: datos4
+        image: elasticsearch:7.10.1
+        environment:
+            - node.name=datos4
+            - cluster.name=Cluster
+            - discovery.seed_hosts=maestro1, maestro2
+            - node.roles=data
+            - xpack.license.self_generated.type=trial
+            - xpack.security.enabled=true
+            - ELASTIC_PASSWORD=password
+        volumes:
+            - /home/ubuntu/environment/data/nodo10:/usr/share/elasticsearch/data
     
     coordinador1:
         container_name: coordinador1
@@ -75,6 +107,9 @@ services:
             node.name: coordinador1
             cluster.name: Cluster
             discovery.seed_hosts: maestro1, maestro2
+            xpack.license.self_generated.type: trial
+            xpack.security.enabled: "true"
+            ELASTIC_PASSWORD: password
         volumes:
             - /home/ubuntu/environment/data/nodo6:/usr/share/elasticsearch/data
             - ./coordinador1.conf.yml:/usr/share/elasticsearch/config/elasticsearch.yml
@@ -86,6 +121,9 @@ services:
             node.name: coordinador2
             cluster.name: Cluster
             discovery.seed_hosts: maestro1, maestro2
+            xpack.license.self_generated.type: trial
+            xpack.security.enabled: "true"
+            ELASTIC_PASSWORD: password
         volumes:
             - /home/ubuntu/environment/data/nodo7:/usr/share/elasticsearch/data
             - ./coordinador2.conf.yml:/usr/share/elasticsearch/config/elasticsearch.yml
@@ -98,6 +136,9 @@ services:
             - cluster.name=Cluster
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=ingest
+            - xpack.license.self_generated.type=trial
+            - xpack.security.enabled=true
+            - ELASTIC_PASSWORD=password
         volumes:
             - /home/ubuntu/environment/data/nodo8:/usr/share/elasticsearch/data
     
@@ -109,6 +150,9 @@ services:
             - cluster.name=Cluster
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=ingest
+            - xpack.license.self_generated.type=trial
+            - xpack.security.enabled=true
+            - ELASTIC_PASSWORD=password
         volumes:
             - /home/ubuntu/environment/data/nodo9:/usr/share/elasticsearch/data
     
@@ -121,6 +165,10 @@ services:
             ELASTICSEARCH_HOSTS: http://coordinador1:9200
             SERVER_NAME: kibana
             SERVER_HOST: kibana       
+            
+            ELASTICSEARCH_USERNAME: elastic
+            ELASTICSEARCH_PASSWORD: password
+
             
     cerebro:
         container_name: cerebro
