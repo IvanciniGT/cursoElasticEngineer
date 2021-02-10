@@ -72,24 +72,24 @@ services:
         container_name: coordinador1
         image: elasticsearch:7.10.1
         environment:
-            - node.name=coordinador1
-            - cluster.name=Cluster
-            - discovery.seed_hosts=maestro1, maestro2
-            - node.roles=
+            node.name: coordinador1
+            cluster.name: Cluster
+            discovery.seed_hosts: maestro1, maestro2
         volumes:
             - /home/ubuntu/environment/data/nodo6:/usr/share/elasticsearch/data
+            - ./coordinador1.conf.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     
     coordinador2:
         container_name: coordinador2
         image: elasticsearch:7.10.1
         environment:
-            - node.name=coordinador2
-            - cluster.name=Cluster
-            - discovery.seed_hosts=maestro1, maestro2
-            - node.roles=
+            node.name: coordinador2
+            cluster.name: Cluster
+            discovery.seed_hosts: maestro1, maestro2
         volumes:
             - /home/ubuntu/environment/data/nodo7:/usr/share/elasticsearch/data
-    
+            - ./coordinador2.conf.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+
     ingesta1:
         container_name: ingesta1
         image: elasticsearch:7.10.1
