@@ -373,13 +373,16 @@ services:
         ports: 
             - 8081:5601
         environment:
-            ELASTICSEARCH_HOSTS: http://coordinador1:9200
+            ELASTICSEARCH_HOSTS: https://coordinador1:9200
             SERVER_NAME: kibana
             SERVER_HOST: kibana       
             
             ELASTICSEARCH_USERNAME: elastic
             ELASTICSEARCH_PASSWORD: password
-
+            ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: /etc/kibana/config/certificates/ca/ca.crt
+        volumes:
+            - /home/ubuntu/environment/data/certificados/ca:/etc/kibana/config/certificates/ca
+        
             
     cerebro:
         container_name: cerebro
