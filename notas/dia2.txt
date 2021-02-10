@@ -46,3 +46,176 @@ En el caso de ES la ruta donde se guardan los datos dentro del contenedor es /us
 Nodo1 - nodo2, nodo3
 Nodo2 - nodo3
 Nodo3
+
+PROTOCOLO REST:
+Peticiones HTTP a un servicio ubicado en una URL
+
+    protocolo://servidor:puerto/contexto?parametros
+
+http(s)://mielastic:9200/
+Contextos: API RESTFULL
+    METODOS HTTP más comunes para operar sobre el contexto
+
+GET     - Recuperar información
+HEAD    - Saber si un contexto está disponible
+POST    - Crear algo en un contexto
+PUT     - Modificar algo en un contexto
+DELETE  - Borrar un contexto
+
+Contextos en elasticSearch
+    /nombre_indice
+
+HEAD http://mielastic:9200/indice1
+    Si existe o no existe
+    Código de respuesta HTTP: 2XX OK
+                              3XX Redirecciones
+                              4XX Error de cliente
+                              5XX Error de servidor
+
+GET http://mielastic:9200/indice1
+DELETE http://mielastic:9200/indice1
+
+POST http://mielastic:9200/indice1
+
+
+Tipos de Nodos:
+- Master: No significa que sea el Master... sino que tiene capacidad de SERLO
+- Ingest
+- Coordinator
+- Data
+
+
+Master: Coordina el trabajo interno del cluster:
+    Decidir donde se pone un shard: master
+    Hay que mirar que todos los nodos están operativos: master
+    Si un nodo no está operativo, hay que tomar decisiones:
+        Movemos shards? ducplicamos shards? Master
+    El maestro se elige por VOTACION. Al menos hacen falta 2 votos
+    Los nodos maestros, SOLO LOS VOY A DEDICAR A SER MESTROS!!!! A NADA MAS
+
+Data: En ellos están los lucenes: Indexación y Búsqueda. Son los que tienen los datos
+
+Ingest: En algunos procesos... Solo en algunos, a veces es necesario preprocesar los datos.
+    Ese preprocesamiento no lo hace Lucene.... lo hace Elastic, en este tipo de nodos
+    
+    Me llega un documento PDF, del que se ha extraido el contenido y se ha pasado a JSON.
+    Pero de todo el texto, a mi solo me intera parte de él... Por ejemplo, lo filtro con expresiones regulares.
+
+Coordinacion: 
+    Los que atienden a peticiones / consultas de usuarios finales (en según que caso me interesan o no)
+
+
+------
+Tengo un cluster de Elastic.
+Ahí tengo un indice sobre el que tengo usuarios que hacen consultas.
+El índice tiene 1 shard primario con 4 replicas.
+Qué pasa cuando un usuario hace una pregunta/consulta?
+[AQUI NO ME INTERESA COORDINADOR]
+--
+El usuario ataca a cualquier nodo del cluster... a través de un balanceador de carga
+Un nodo recibe la consulta... Y le pregunta al master: Donde están los datos???
+El master responde: >>>>>>>>>>   Vete al nodo4 mismo, que hay lo tienes.
+En nodo original, al que le llegó la petición, se la enchufa al nodo4
+Nodo4, le pide a su LUCENE... Busca... Y Lucene contesta. Que devuelve Lucen: Unos documentos
+El nodo4, los empaqueta y devuelve en JSON al cliente
+------
+Tengo un cluster de Elastic.
+Ahí tengo un indice sobre el que tengo usuarios que hacen consultas.
+El índice tiene VARIOS shards primarios repartidos en VARIAS MAQUINAS.
+Qué pasa cuando un usuario hace una pregunta/consulta?
+[AQUI ME INTERESA COORDINADOR]
+--
+El usuario ataca a cualquier nodo del cluster... a través de un balanceador de carga
+Un nodo de COORDINADOR recibe la consulta... Y le pregunta al master: Donde están los datos???
+El master responde: >>>>>>>>>>   Vete al nodo 4, nodo 6, nodo 9, nodo 15, que hay lo tienes.
+El nodo original, le pide a cada nodo sus datos
+    - nodo4, le pide a su LUCENE... Busca... Y Lucene contesta. Que devuelve Lucen: Unos documentos
+    - nodo6, le pide a su LUCENE... Busca... Y Lucene contesta. Que devuelve Lucen: Unos documentos
+    - nodo9, le pide a su LUCENE... Busca... Y Lucene contesta. Que devuelve Lucen: Unos documentos
+    - nodo15, le pide a su LUCENE... Busca... Y Lucene contesta. Que devuelve Lucen: Unos documentos
+El nodo que ha recibido la consulta, que es de COORDINADOR, toma las respuestas de TODO los nodos involucrados y
+    los empaqueta (ORDENAR POR RELEVANCIA) y devuelve en JSON al cliente
+------              PESADO
+
+Características de nodos de tipo:
+
+MASTER: Cutre donde la haya
+    CPU? Na de na
+    RAM? Na de na
+    Disco? Na de na
+
+DATA:    
+    CPU? Ni mucho ni poco
+    RAM? PEPINAZO !!!!!!!!
+    Disco? SSD ULTRA SUPER RAPIDO
+    Subcategorias:
+        DATA_HOT
+        DATA_WARM
+        DATA_COLD: Velocidad del almacenamiento
+
+Ingesta:    
+    CPU? PEPINAZO
+    RAM? Buah!
+    Disco? Como si no tiene
+    
+Coordinación:
+    CPU? PEPINAZO
+    RAM? PEPINAZO
+    Disco? Como si no tiene
+-----------------------------------------------------------------------------------------
+¿Cómo voy a montar mi cluster?
+    ¿Qué coche me interesa?
+    ¿Qué juguete te compro?
+---------------------------------- SIEMPRE: MINIMO
+MASTER  x  3. Mínimo en un cluster (De los 3, 1 es de mentira... que solo vota... va a ser un data)
+    NO ENTRA NI EL TATO... El puerto 9200 cortado en firewall
+DATA    x  2. Para la replica de los shards <<<< Balanceador
+-------- A partir de ahí...
+Monitorizar el cluster
+Si veo que los data no dan a basto?
+Miro a ver porqué no dan a basto?
+    - El tiempo está en lucene? Entoces MAS DATA
+    - Si el tiempo está en coordinacion de consultas? MONTO UN COORDINADOR?
+        - NO... Cuantos monto? Al menos 2
+        A partir de esté momento tendré que cambiar el balanceador de carga de mis clientes finales
+            (KIBANAs) para que apunten a los coordinadores.
+    - Si el tiempo está en preparacion de datos??? MONTO UN INGESTA?
+        - NO... Cuantos monto? Al menos 2
+        - Crear un balanceador de carga nuevo para INGESTA <<<< Logstash, Fluentd, Beat
+-------------------------
+¿Si tengo 3 maestros?
+Cuantos están currando? SOLO 1.... ACTIVO-PASIVO
+Tengo 2 maquinas paradas = RUINA !!!!! €€€€€ que se están cayendo por la red.
+Truco:
+    A uno de los DATA le voy a poner que PUEDA SER MAESTRO, PERO DE MENITIRIJILLA, SOLO PARA VOTAR
+
+-----------------------------------------------------------------------------------------
+Servidor Web 1:                              |     Cluster Elastic
+    apache.log                               | 
+    weblogic.log    > Texto plano  < Fluend  |    -----JSON-----> ES
+                                       CPU   |
+-----------------------------------------------------------------------------------------
+Servidor Web 1:                              |    Contenedor    |   Cluster Elastic
+    apache.log                               | 
+    weblogic.log    > Texto plano  < FileBeat|    Logstash -----JSON-----> Procesaré ---> ES1 Monitorización SISTEMAS
+                                       CPU   |     toJSON           -----> Procesaré ---> ES2 CLIENTE FINAL MAPA DE ACCESO
+                                                                            Logstash
+                                                                            Kafka
+                                                                            
+        
+
+
+
+                VOTO
+    MAESTRO 1 -  m1
+    MAESTRO 2 -  m1
+X   MAESTRO 3
+
+                                VOTO
+X   MAESTRO 1               -  
+x   MAESTRO 2               -  m2
+    NAESTRO 3 de mentira    -  m2
+    
+KUBERNETES.
+
+Deployment Pods . templates ---> ConfigMap

@@ -1,0 +1,129 @@
+version: "3.0"
+
+# 2 master
+# 3 data
+# 2 ingesta
+# 2 coordinadores
+# Kibana y cerebro
+
+services:
+    maestro1:
+        container_name: maestro1
+        image: elasticsearch:7.10.1
+        environment:
+            - node.name=maestro1
+            - cluster.name=Cluster
+            - cluster.initial_master_nodes=maestro1, maestro2
+            - discovery.seed_hosts=maestro2, datos1
+            - cluster.routing.allocation.disk.threshold_enabled=false
+            - node.roles=master
+#            - cluster.routing.allocation.disk.watermark_low
+#            - cluster.routing.allocation.disk.watermark_high
+        volumes:
+            - /home/ubuntu/environment/data/nodo1:/usr/share/elasticsearch/data
+
+    maestro2:
+        container_name: maestro2
+        image: elasticsearch:7.10.1
+        environment:
+            - node.name=maestro2
+            - cluster.name=Cluster
+            - cluster.initial_master_nodes=maestro1, maestro2
+            - discovery.seed_hosts=maestro1, datos1
+            - cluster.routing.allocation.disk.threshold_enabled=false
+            - node.roles=master
+        volumes:
+            - /home/ubuntu/environment/data/nodo2:/usr/share/elasticsearch/data
+    
+    datos1:
+        container_name: datos1
+        image: elasticsearch:7.10.1
+        environment:
+            - node.name=datos1
+            - cluster.name=Cluster
+            - discovery.seed_hosts=maestro1, maestro2
+            - node.roles=data,master,voting_only
+        volumes:
+            - /home/ubuntu/environment/data/nodo3:/usr/share/elasticsearch/data
+    
+    datos2:
+        container_name: datos2
+        image: elasticsearch:7.10.1
+        environment:
+            - node.name=datos2
+            - cluster.name=Cluster
+            - discovery.seed_hosts=maestro1, maestro2
+            - node.roles=data
+        volumes:
+            - /home/ubuntu/environment/data/nodo4:/usr/share/elasticsearch/data
+    
+    datos3:
+        container_name: datos3
+        image: elasticsearch:7.10.1
+        environment:
+            - node.name=datos3
+            - cluster.name=Cluster
+            - discovery.seed_hosts=maestro1, maestro2
+            - node.roles=data
+        volumes:
+            - /home/ubuntu/environment/data/nodo5:/usr/share/elasticsearch/data
+    
+    coordinador1:
+        container_name: coordinador1
+        image: elasticsearch:7.10.1
+        environment:
+            - node.name=coordinador1
+            - cluster.name=Cluster
+            - discovery.seed_hosts=maestro1, maestro2
+            - node.roles=
+        volumes:
+            - /home/ubuntu/environment/data/nodo6:/usr/share/elasticsearch/data
+    
+    coordinador2:
+        container_name: coordinador2
+        image: elasticsearch:7.10.1
+        environment:
+            - node.name=coordinador2
+            - cluster.name=Cluster
+            - discovery.seed_hosts=maestro1, maestro2
+            - node.roles=
+        volumes:
+            - /home/ubuntu/environment/data/nodo7:/usr/share/elasticsearch/data
+    
+    ingesta1:
+        container_name: ingesta1
+        image: elasticsearch:7.10.1
+        environment:
+            - node.name=ingesta1
+            - cluster.name=Cluster
+            - discovery.seed_hosts=maestro1, maestro2
+            - node.roles=ingest
+        volumes:
+            - /home/ubuntu/environment/data/nodo8:/usr/share/elasticsearch/data
+    
+    ingesta2:
+        container_name: ingesta2
+        image: elasticsearch:7.10.1
+        environment:
+            - node.name=ingesta2
+            - cluster.name=Cluster
+            - discovery.seed_hosts=maestro1, maestro2
+            - node.roles=ingest
+        volumes:
+            - /home/ubuntu/environment/data/nodo9:/usr/share/elasticsearch/data
+    
+    kibana:
+        container_name: kibana
+        image: kibana:7.10.1
+        ports: 
+            - 8081:5601
+        environment:
+            ELASTICSEARCH_HOSTS: http://coordinador1:9200
+            SERVER_NAME: kibana
+            SERVER_HOST: kibana       
+            
+    cerebro:
+        container_name: cerebro
+        image: lmenezes/cerebro:0.9.3
+        ports: 
+            - 8082:9000
