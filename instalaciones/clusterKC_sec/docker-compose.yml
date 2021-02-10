@@ -23,10 +23,29 @@ services:
 #            - cluster.routing.allocation.disk.watermark_high
             #- xpack.license.self_generated.type=basic
             - xpack.license.self_generated.type=trial
-            - xpack.security.enabled=true
             - ELASTIC_PASSWORD=password
+            
+            - xpack.security.enabled=true
+            # - xpack.security.network
+            # - xpack.security.http             9200 Comunicación externa
+            - xpack.security.http.ssl.enabled=true
+            - xpack.security.http.ssl.key=/certificados/nodo/maestro1.key
+            - xpack.security.http.ssl.certificate=/certificados/nodo/maestro1.crt
+            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            # - xpack.security.transport        9300 Comunicacion interna
+            - xpack.security.transport.ssl.enabled=true
+            - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
+            - xpack.security.transport.ssl.key=/certificados/nodo/maestro1.key
+            - xpack.security.transport.ssl.certificate=/certificados/nodo/maestro1.crt
+            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            
+            # Timeouts
+            - cluster.join.timeout=180s
+            - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo1:/usr/share/elasticsearch/data
+            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
+            - /home/ubuntu/environment/data/certificados/maestro1:/certificados/nodo
 
     maestro2:
         container_name: maestro2
@@ -39,10 +58,30 @@ services:
             - cluster.routing.allocation.disk.threshold_enabled=false
             - node.roles=master
             - xpack.license.self_generated.type=trial
-            - xpack.security.enabled=true
             - ELASTIC_PASSWORD=password
+            
+            - xpack.security.enabled=true
+            # - xpack.security.network
+            # - xpack.security.http             9200 Comunicación externa
+            - xpack.security.http.ssl.enabled=true
+            - xpack.security.http.ssl.key=/certificados/nodo/maestro2.key
+            - xpack.security.http.ssl.certificate=/certificados/nodo/maestro2.crt
+            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            # - xpack.security.transport        9300 Comunicacion interna
+            - xpack.security.transport.ssl.enabled=true
+            - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
+            - xpack.security.transport.ssl.key=/certificados/nodo/maestro2.key
+            - xpack.security.transport.ssl.certificate=/certificados/nodo/maestro2.crt
+            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            
+            # Timeouts
+            - cluster.join.timeout=180s
+            - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo2:/usr/share/elasticsearch/data
+            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
+            - /home/ubuntu/environment/data/certificados/maestro2:/certificados/nodo
+
     
     datos1:
         container_name: datos1
@@ -52,12 +91,32 @@ services:
             - cluster.name=Cluster
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=data,master,voting_only
-            - xpack.license.self_generated.type=trial
-            - xpack.security.enabled=true
+             - xpack.license.self_generated.type=trial
             - ELASTIC_PASSWORD=password
+            
+            - xpack.security.enabled=true
+            # - xpack.security.network
+            # - xpack.security.http             9200 Comunicación externa
+            - xpack.security.http.ssl.enabled=true
+            - xpack.security.http.ssl.key=/certificados/nodo/datos1.key
+            - xpack.security.http.ssl.certificate=/certificados/nodo/datos1.crt
+            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            # - xpack.security.transport        9300 Comunicacion interna
+            - xpack.security.transport.ssl.enabled=true
+            - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
+            - xpack.security.transport.ssl.key=/certificados/nodo/datos1.key
+            - xpack.security.transport.ssl.certificate=/certificados/nodo/datos1.crt
+            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            
+            # Timeouts
+            - cluster.join.timeout=180s
+            - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo3:/usr/share/elasticsearch/data
-    
+            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
+            - /home/ubuntu/environment/data/certificados/datos1:/certificados/nodo
+
+   
     datos2:
         container_name: datos2
         image: elasticsearch:7.10.1
@@ -66,12 +125,32 @@ services:
             - cluster.name=Cluster
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=data
-            - xpack.license.self_generated.type=trial
-            - xpack.security.enabled=true
+              - xpack.license.self_generated.type=trial
             - ELASTIC_PASSWORD=password
+            
+            - xpack.security.enabled=true
+            # - xpack.security.network
+            # - xpack.security.http             9200 Comunicación externa
+            - xpack.security.http.ssl.enabled=true
+            - xpack.security.http.ssl.key=/certificados/nodo/datos2.key
+            - xpack.security.http.ssl.certificate=/certificados/nodo/datos2.crt
+            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            # - xpack.security.transport        9300 Comunicacion interna
+            - xpack.security.transport.ssl.enabled=true
+            - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
+            - xpack.security.transport.ssl.key=/certificados/nodo/datos2.key
+            - xpack.security.transport.ssl.certificate=/certificados/nodo/datos2.crt
+            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            
+            # Timeouts
+            - cluster.join.timeout=180s
+            - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo4:/usr/share/elasticsearch/data
-    
+            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
+            - /home/ubuntu/environment/data/certificados/datos2:/certificados/nodo
+
+ 
     datos3:
         container_name: datos3
         image: elasticsearch:7.10.1
@@ -81,11 +160,31 @@ services:
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=data
             - xpack.license.self_generated.type=trial
-            - xpack.security.enabled=true
             - ELASTIC_PASSWORD=password
+            
+            - xpack.security.enabled=true
+            # - xpack.security.network
+            # - xpack.security.http             9200 Comunicación externa
+            - xpack.security.http.ssl.enabled=true
+            - xpack.security.http.ssl.key=/certificados/nodo/datos3.key
+            - xpack.security.http.ssl.certificate=/certificados/nodo/datos3.crt
+            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            # - xpack.security.transport        9300 Comunicacion interna
+            - xpack.security.transport.ssl.enabled=true
+            - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
+            - xpack.security.transport.ssl.key=/certificados/nodo/datos3.key
+            - xpack.security.transport.ssl.certificate=/certificados/nodo/datos3.crt
+            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            
+            # Timeouts
+            - cluster.join.timeout=180s
+            - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo5:/usr/share/elasticsearch/data
-    
+            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
+            - /home/ubuntu/environment/data/certificados/datos3:/certificados/nodo
+
+
     datos4:
         container_name: datos4
         image: elasticsearch:7.10.1
@@ -95,38 +194,96 @@ services:
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=data
             - xpack.license.self_generated.type=trial
-            - xpack.security.enabled=true
             - ELASTIC_PASSWORD=password
+            
+            - xpack.security.enabled=true
+            # - xpack.security.network
+            # - xpack.security.http             9200 Comunicación externa
+            - xpack.security.http.ssl.enabled=true
+            - xpack.security.http.ssl.key=/certificados/nodo/datos4.key
+            - xpack.security.http.ssl.certificate=/certificados/nodo/datos4.crt
+            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            # - xpack.security.transport        9300 Comunicacion interna
+            - xpack.security.transport.ssl.enabled=true
+            - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
+            - xpack.security.transport.ssl.key=/certificados/nodo/datos4.key
+            - xpack.security.transport.ssl.certificate=/certificados/nodo/datos4.crt
+            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            
+            # Timeouts
+            - cluster.join.timeout=180s
+            - cluster.publish.timeout=180s
         volumes:
-            - /home/ubuntu/environment/data/nodo10:/usr/share/elasticsearch/data
-    
+            - /home/ubuntu/environment/data/nodo6:/usr/share/elasticsearch/data
+            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
+            - /home/ubuntu/environment/data/certificados/datos4:/certificados/nodo
+
+
     coordinador1:
         container_name: coordinador1
         image: elasticsearch:7.10.1
         environment:
-            node.name: coordinador1
-            cluster.name: Cluster
-            discovery.seed_hosts: maestro1, maestro2
-            xpack.license.self_generated.type: trial
-            xpack.security.enabled: "true"
-            ELASTIC_PASSWORD: password
+            - node.name=coordinador1
+            - cluster.name=Cluster
+            - discovery.seed_hosts=maestro1, maestro2
+            - xpack.license.self_generated.type=trial
+            - ELASTIC_PASSWORD=password
+            
+            - xpack.security.enabled=true
+            # - xpack.security.network
+            # - xpack.security.http             9200 Comunicación externa
+            - xpack.security.http.ssl.enabled=true
+            - xpack.security.http.ssl.key=/certificados/nodo/coordinador1.key
+            - xpack.security.http.ssl.certificate=/certificados/nodo/coordinador1.crt
+            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            # - xpack.security.transport        9300 Comunicacion interna
+            - xpack.security.transport.ssl.enabled=true
+            - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
+            - xpack.security.transport.ssl.key=/certificados/nodo/coordinador1.key
+            - xpack.security.transport.ssl.certificate=/certificados/nodo/coordinador1.crt
+            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            
+            # Timeouts
+            - cluster.join.timeout=180s
+            - cluster.publish.timeout=180s
         volumes:
-            - /home/ubuntu/environment/data/nodo6:/usr/share/elasticsearch/data
-            - ./coordinador1.conf.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-    
+            - /home/ubuntu/environment/data/nodo7:/usr/share/elasticsearch/data
+            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
+            - /home/ubuntu/environment/data/certificados/coordinador1:/certificados/nodo
+
+
     coordinador2:
         container_name: coordinador2
         image: elasticsearch:7.10.1
         environment:
-            node.name: coordinador2
-            cluster.name: Cluster
-            discovery.seed_hosts: maestro1, maestro2
-            xpack.license.self_generated.type: trial
-            xpack.security.enabled: "true"
-            ELASTIC_PASSWORD: password
+            - node.name=coordinador2
+            - cluster.name=Cluster
+            - discovery.seed_hosts=maestro1, maestro2
+            - xpack.license.self_generated.type=trial
+            - ELASTIC_PASSWORD=password
+            
+            - xpack.security.enabled=true
+            # - xpack.security.network
+            # - xpack.security.http             9200 Comunicación externa
+            - xpack.security.http.ssl.enabled=true
+            - xpack.security.http.ssl.key=/certificados/nodo/coordinador2.key
+            - xpack.security.http.ssl.certificate=/certificados/nodo/coordinador2.crt
+            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            # - xpack.security.transport        9300 Comunicacion interna
+            - xpack.security.transport.ssl.enabled=true
+            - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
+            - xpack.security.transport.ssl.key=/certificados/nodo/coordinador2.key
+            - xpack.security.transport.ssl.certificate=/certificados/nodo/coordinador2.crt
+            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            
+            # Timeouts
+            - cluster.join.timeout=180s
+            - cluster.publish.timeout=180s
         volumes:
-            - /home/ubuntu/environment/data/nodo7:/usr/share/elasticsearch/data
-            - ./coordinador2.conf.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+            - /home/ubuntu/environment/data/nodo8:/usr/share/elasticsearch/data
+            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
+            - /home/ubuntu/environment/data/certificados/coordinador2:/certificados/nodo
+
 
     ingesta1:
         container_name: ingesta1
@@ -137,11 +294,31 @@ services:
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=ingest
             - xpack.license.self_generated.type=trial
-            - xpack.security.enabled=true
             - ELASTIC_PASSWORD=password
+            
+            - xpack.security.enabled=true
+            # - xpack.security.network
+            # - xpack.security.http             9200 Comunicación externa
+            - xpack.security.http.ssl.enabled=true
+            - xpack.security.http.ssl.key=/certificados/nodo/ingesta1.key
+            - xpack.security.http.ssl.certificate=/certificados/nodo/ingesta1.crt
+            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            # - xpack.security.transport        9300 Comunicacion interna
+            - xpack.security.transport.ssl.enabled=true
+            - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
+            - xpack.security.transport.ssl.key=/certificados/nodo/ingesta1.key
+            - xpack.security.transport.ssl.certificate=/certificados/nodo/ingesta1.crt
+            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            
+            # Timeouts
+            - cluster.join.timeout=180s
+            - cluster.publish.timeout=180s
         volumes:
-            - /home/ubuntu/environment/data/nodo8:/usr/share/elasticsearch/data
-    
+            - /home/ubuntu/environment/data/nodo9:/usr/share/elasticsearch/data
+            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
+            - /home/ubuntu/environment/data/certificados/ingesta1:/certificados/nodo
+
+
     ingesta2:
         container_name: ingesta2
         image: elasticsearch:7.10.1
@@ -151,11 +328,31 @@ services:
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=ingest
             - xpack.license.self_generated.type=trial
-            - xpack.security.enabled=true
             - ELASTIC_PASSWORD=password
+            
+            - xpack.security.enabled=true
+            # - xpack.security.network
+            # - xpack.security.http             9200 Comunicación externa
+            - xpack.security.http.ssl.enabled=true
+            - xpack.security.http.ssl.key=/certificados/nodo/ingesta2.key
+            - xpack.security.http.ssl.certificate=/certificados/nodo/ingesta2.crt
+            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            # - xpack.security.transport        9300 Comunicacion interna
+            - xpack.security.transport.ssl.enabled=true
+            - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
+            - xpack.security.transport.ssl.key=/certificados/nodo/ingesta2.key
+            - xpack.security.transport.ssl.certificate=/certificados/nodo/ingesta2.crt
+            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            
+            # Timeouts
+            - cluster.join.timeout=180s
+            - cluster.publish.timeout=180s
         volumes:
-            - /home/ubuntu/environment/data/nodo9:/usr/share/elasticsearch/data
-    
+            - /home/ubuntu/environment/data/nodo10:/usr/share/elasticsearch/data
+            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
+            - /home/ubuntu/environment/data/certificados/ingesta2:/certificados/nodo
+
+
     crear_certificados:
         container_name: crear_certificados
         image: elasticsearch:7.10.1
