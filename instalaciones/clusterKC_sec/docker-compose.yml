@@ -29,23 +29,23 @@ services:
             # - xpack.security.network
             # - xpack.security.http             9200 Comunicación externa
             - xpack.security.http.ssl.enabled=true
-            - xpack.security.http.ssl.key=/certificados/nodo/maestro1.key
-            - xpack.security.http.ssl.certificate=/certificados/nodo/maestro1.crt
-            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/maestro1.key
+            - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/maestro1.crt
+            - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             # - xpack.security.transport        9300 Comunicacion interna
             - xpack.security.transport.ssl.enabled=true
             - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
-            - xpack.security.transport.ssl.key=/certificados/nodo/maestro1.key
-            - xpack.security.transport.ssl.certificate=/certificados/nodo/maestro1.crt
-            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/maestro1.key
+            - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/maestro1.crt
+            - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             
             # Timeouts
             - cluster.join.timeout=180s
             - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo1:/usr/share/elasticsearch/data
-            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
-            - /home/ubuntu/environment/data/certificados/maestro1:/certificados/nodo
+            - /home/ubuntu/environment/data/certificados/ca:/usr/share/elasticsearch/config/certificates/ca
+            - /home/ubuntu/environment/data/certificados/maestro1:/usr/share/elasticsearch/config/certificates/nodo
 
     maestro2:
         container_name: maestro2
@@ -64,23 +64,23 @@ services:
             # - xpack.security.network
             # - xpack.security.http             9200 Comunicación externa
             - xpack.security.http.ssl.enabled=true
-            - xpack.security.http.ssl.key=/certificados/nodo/maestro2.key
-            - xpack.security.http.ssl.certificate=/certificados/nodo/maestro2.crt
-            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/maestro2.key
+            - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/maestro2.crt
+            - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             # - xpack.security.transport        9300 Comunicacion interna
             - xpack.security.transport.ssl.enabled=true
             - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
-            - xpack.security.transport.ssl.key=/certificados/nodo/maestro2.key
-            - xpack.security.transport.ssl.certificate=/certificados/nodo/maestro2.crt
-            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/maestro2.key
+            - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/maestro2.crt
+            - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             
             # Timeouts
             - cluster.join.timeout=180s
             - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo2:/usr/share/elasticsearch/data
-            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
-            - /home/ubuntu/environment/data/certificados/maestro2:/certificados/nodo
+            - /home/ubuntu/environment/data/certificados/ca:/usr/share/elasticsearch/config/certificates/ca
+            - /home/ubuntu/environment/data/certificados/maestro2:/usr/share/elasticsearch/config/certificates/nodo
 
     
     datos1:
@@ -98,23 +98,23 @@ services:
             # - xpack.security.network
             # - xpack.security.http             9200 Comunicación externa
             - xpack.security.http.ssl.enabled=true
-            - xpack.security.http.ssl.key=/certificados/nodo/datos1.key
-            - xpack.security.http.ssl.certificate=/certificados/nodo/datos1.crt
-            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/datos1.key
+            - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/datos1.crt
+            - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             # - xpack.security.transport        9300 Comunicacion interna
             - xpack.security.transport.ssl.enabled=true
             - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
-            - xpack.security.transport.ssl.key=/certificados/nodo/datos1.key
-            - xpack.security.transport.ssl.certificate=/certificados/nodo/datos1.crt
-            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/datos1.key
+            - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/datos1.crt
+            - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             
             # Timeouts
             - cluster.join.timeout=180s
             - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo3:/usr/share/elasticsearch/data
-            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
-            - /home/ubuntu/environment/data/certificados/datos1:/certificados/nodo
+            - /home/ubuntu/environment/data/certificados/ca:/usr/share/elasticsearch/config/certificates/ca
+            - /home/ubuntu/environment/data/certificados/datos1:/usr/share/elasticsearch/config/certificates/nodo
 
    
     datos2:
@@ -132,23 +132,23 @@ services:
             # - xpack.security.network
             # - xpack.security.http             9200 Comunicación externa
             - xpack.security.http.ssl.enabled=true
-            - xpack.security.http.ssl.key=/certificados/nodo/datos2.key
-            - xpack.security.http.ssl.certificate=/certificados/nodo/datos2.crt
-            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/datos2.key
+            - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/datos2.crt
+            - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             # - xpack.security.transport        9300 Comunicacion interna
             - xpack.security.transport.ssl.enabled=true
             - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
-            - xpack.security.transport.ssl.key=/certificados/nodo/datos2.key
-            - xpack.security.transport.ssl.certificate=/certificados/nodo/datos2.crt
-            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/datos2.key
+            - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/datos2.crt
+            - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             
             # Timeouts
             - cluster.join.timeout=180s
             - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo4:/usr/share/elasticsearch/data
-            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
-            - /home/ubuntu/environment/data/certificados/datos2:/certificados/nodo
+            - /home/ubuntu/environment/data/certificados/ca:/usr/share/elasticsearch/config/certificates/ca
+            - /home/ubuntu/environment/data/certificados/datos2:/usr/share/elasticsearch/config/certificates/nodo
 
  
     datos3:
@@ -166,23 +166,23 @@ services:
             # - xpack.security.network
             # - xpack.security.http             9200 Comunicación externa
             - xpack.security.http.ssl.enabled=true
-            - xpack.security.http.ssl.key=/certificados/nodo/datos3.key
-            - xpack.security.http.ssl.certificate=/certificados/nodo/datos3.crt
-            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/datos3.key
+            - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/datos3.crt
+            - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             # - xpack.security.transport        9300 Comunicacion interna
             - xpack.security.transport.ssl.enabled=true
             - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
-            - xpack.security.transport.ssl.key=/certificados/nodo/datos3.key
-            - xpack.security.transport.ssl.certificate=/certificados/nodo/datos3.crt
-            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/datos3.key
+            - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/datos3.crt
+            - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             
             # Timeouts
             - cluster.join.timeout=180s
             - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo5:/usr/share/elasticsearch/data
-            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
-            - /home/ubuntu/environment/data/certificados/datos3:/certificados/nodo
+            - /home/ubuntu/environment/data/certificados/ca:/usr/share/elasticsearch/config/certificates/ca
+            - /home/ubuntu/environment/data/certificados/datos3:/usr/share/elasticsearch/config/certificates/nodo
 
 
     datos4:
@@ -200,23 +200,23 @@ services:
             # - xpack.security.network
             # - xpack.security.http             9200 Comunicación externa
             - xpack.security.http.ssl.enabled=true
-            - xpack.security.http.ssl.key=/certificados/nodo/datos4.key
-            - xpack.security.http.ssl.certificate=/certificados/nodo/datos4.crt
-            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/datos4.key
+            - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/datos4.crt
+            - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             # - xpack.security.transport        9300 Comunicacion interna
             - xpack.security.transport.ssl.enabled=true
             - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
-            - xpack.security.transport.ssl.key=/certificados/nodo/datos4.key
-            - xpack.security.transport.ssl.certificate=/certificados/nodo/datos4.crt
-            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/datos4.key
+            - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/datos4.crt
+            - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             
             # Timeouts
             - cluster.join.timeout=180s
             - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo6:/usr/share/elasticsearch/data
-            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
-            - /home/ubuntu/environment/data/certificados/datos4:/certificados/nodo
+            - /home/ubuntu/environment/data/certificados/ca:/usr/share/elasticsearch/config/certificates/ca
+            - /home/ubuntu/environment/data/certificados/datos4:/usr/share/elasticsearch/config/certificates/nodo
 
 
     coordinador1:
@@ -233,23 +233,23 @@ services:
             # - xpack.security.network
             # - xpack.security.http             9200 Comunicación externa
             - xpack.security.http.ssl.enabled=true
-            - xpack.security.http.ssl.key=/certificados/nodo/coordinador1.key
-            - xpack.security.http.ssl.certificate=/certificados/nodo/coordinador1.crt
-            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/coordinador1.key
+            - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/coordinador1.crt
+            - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             # - xpack.security.transport        9300 Comunicacion interna
             - xpack.security.transport.ssl.enabled=true
             - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
-            - xpack.security.transport.ssl.key=/certificados/nodo/coordinador1.key
-            - xpack.security.transport.ssl.certificate=/certificados/nodo/coordinador1.crt
-            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/coordinador1.key
+            - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/coordinador1.crt
+            - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             
             # Timeouts
             - cluster.join.timeout=180s
             - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo7:/usr/share/elasticsearch/data
-            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
-            - /home/ubuntu/environment/data/certificados/coordinador1:/certificados/nodo
+            - /home/ubuntu/environment/data/certificados/ca:/usr/share/elasticsearch/config/certificates/ca
+            - /home/ubuntu/environment/data/certificados/coordinador1:/usr/share/elasticsearch/config/certificates/nodo
 
 
     coordinador2:
@@ -266,23 +266,23 @@ services:
             # - xpack.security.network
             # - xpack.security.http             9200 Comunicación externa
             - xpack.security.http.ssl.enabled=true
-            - xpack.security.http.ssl.key=/certificados/nodo/coordinador2.key
-            - xpack.security.http.ssl.certificate=/certificados/nodo/coordinador2.crt
-            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/coordinador2.key
+            - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/coordinador2.crt
+            - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             # - xpack.security.transport        9300 Comunicacion interna
             - xpack.security.transport.ssl.enabled=true
             - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
-            - xpack.security.transport.ssl.key=/certificados/nodo/coordinador2.key
-            - xpack.security.transport.ssl.certificate=/certificados/nodo/coordinador2.crt
-            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/coordinador2.key
+            - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/coordinador2.crt
+            - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             
             # Timeouts
             - cluster.join.timeout=180s
             - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo8:/usr/share/elasticsearch/data
-            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
-            - /home/ubuntu/environment/data/certificados/coordinador2:/certificados/nodo
+            - /home/ubuntu/environment/data/certificados/ca:/usr/share/elasticsearch/config/certificates/ca
+            - /home/ubuntu/environment/data/certificados/coordinador2:/usr/share/elasticsearch/config/certificates/nodo
 
 
     ingesta1:
@@ -300,23 +300,23 @@ services:
             # - xpack.security.network
             # - xpack.security.http             9200 Comunicación externa
             - xpack.security.http.ssl.enabled=true
-            - xpack.security.http.ssl.key=/certificados/nodo/ingesta1.key
-            - xpack.security.http.ssl.certificate=/certificados/nodo/ingesta1.crt
-            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/ingesta1.key
+            - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/ingesta1.crt
+            - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             # - xpack.security.transport        9300 Comunicacion interna
             - xpack.security.transport.ssl.enabled=true
             - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
-            - xpack.security.transport.ssl.key=/certificados/nodo/ingesta1.key
-            - xpack.security.transport.ssl.certificate=/certificados/nodo/ingesta1.crt
-            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/ingesta1.key
+            - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/ingesta1.crt
+            - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             
             # Timeouts
             - cluster.join.timeout=180s
             - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo9:/usr/share/elasticsearch/data
-            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
-            - /home/ubuntu/environment/data/certificados/ingesta1:/certificados/nodo
+            - /home/ubuntu/environment/data/certificados/ca:/usr/share/elasticsearch/config/certificates/ca
+            - /home/ubuntu/environment/data/certificados/ingesta1:/usr/share/elasticsearch/config/certificates/nodo
 
 
     ingesta2:
@@ -334,23 +334,23 @@ services:
             # - xpack.security.network
             # - xpack.security.http             9200 Comunicación externa
             - xpack.security.http.ssl.enabled=true
-            - xpack.security.http.ssl.key=/certificados/nodo/ingesta2.key
-            - xpack.security.http.ssl.certificate=/certificados/nodo/ingesta2.crt
-            - xpack.security.http.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/ingesta2.key
+            - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/ingesta2.crt
+            - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             # - xpack.security.transport        9300 Comunicacion interna
             - xpack.security.transport.ssl.enabled=true
             - xpack.security.transport.ssl.verification_mode=certificate ## SSL2
-            - xpack.security.transport.ssl.key=/certificados/nodo/ingesta2.key
-            - xpack.security.transport.ssl.certificate=/certificados/nodo/ingesta2.crt
-            - xpack.security.transport.ssl.certificate_authorities=/certificados/ca/ca.crt
+            - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/nodo/ingesta2.key
+            - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certificates/nodo/ingesta2.crt
+            - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
             
             # Timeouts
             - cluster.join.timeout=180s
             - cluster.publish.timeout=180s
         volumes:
             - /home/ubuntu/environment/data/nodo10:/usr/share/elasticsearch/data
-            - /home/ubuntu/environment/data/certificados/ca:/certificados/ca
-            - /home/ubuntu/environment/data/certificados/ingesta2:/certificados/nodo
+            - /home/ubuntu/environment/data/certificados/ca:/usr/share/elasticsearch/config/certificates/ca
+            - /home/ubuntu/environment/data/certificados/ingesta2:/usr/share/elasticsearch/config/certificates/nodo
 
 
     crear_certificados:
@@ -358,9 +358,9 @@ services:
         image: elasticsearch:7.10.1
         command: >
             bash -c '
-            if [[ ! -f /certificados/certificados.zip ]]; then
-                /usr/share/elasticsearch/bin/elasticsearch-certutil cert --silent --pem --in /usr/share/elasticsearch/config/certificates/nodos.yml -out /certificados/certificados.zip
-                chmod 777 /certificados/certificados.zip
+            if [[ ! -f /usr/share/elasticsearch/config/certificates/certificados.zip ]]; then
+                /usr/share/elasticsearch/bin/elasticsearch-certutil cert --silent --pem --in /usr/share/elasticsearch/config/certificates/nodos.yml -out /usr/share/elasticsearch/config/certificates/certificados.zip
+                chmod 777 /usr/share/elasticsearch/config/certificates/certificados.zip
             fi
             '
         volumes:
