@@ -91,7 +91,7 @@ services:
             - cluster.name=Cluster
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=data,master,voting_only
-             - xpack.license.self_generated.type=trial
+            - xpack.license.self_generated.type=trial
             - ELASTIC_PASSWORD=password
             
             - xpack.security.enabled=true
@@ -125,7 +125,7 @@ services:
             - cluster.name=Cluster
             - discovery.seed_hosts=maestro1, maestro2
             - node.roles=data
-              - xpack.license.self_generated.type=trial
+            - xpack.license.self_generated.type=trial
             - ELASTIC_PASSWORD=password
             
             - xpack.security.enabled=true
@@ -389,3 +389,5 @@ services:
         image: lmenezes/cerebro:0.9.3
         ports: 
             - 8082:9000
+        volumes:
+            - /home/ubuntu/environment/data/certificados/ca:/opt/cerebro/ca
