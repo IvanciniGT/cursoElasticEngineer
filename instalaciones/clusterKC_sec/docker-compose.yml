@@ -390,4 +390,5 @@ services:
         ports: 
             - 8082:9000
         volumes:
-            - /home/ubuntu/environment/data/certificados/ca:/opt/cerebro/ca
+            - /home/ubuntu/environment/data/certificados/ca:/opt/cerebro/ca            
+            - ./application.conf:/opt/cerebro/conf/application.conf
