@@ -364,7 +364,7 @@ services:
             fi
             '
         volumes:
-            - /home/ubuntu/environment/data/certificados:/certificados
+            - /home/ubuntu/environment/data/certificados:/usr/share/elasticsearch/config/certificates
             - ./nodos.yml:/usr/share/elasticsearch/config/certificates/nodos.yml
     
     kibana:
@@ -380,8 +380,13 @@ services:
             ELASTICSEARCH_USERNAME: elastic
             ELASTICSEARCH_PASSWORD: password
             ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: /etc/kibana/config/certificates/ca/ca.crt
+            
+#            SERVER_SSL_ENABLED: "true"
+#            SERVER_SSL_CERTIFICATE: /etc/kibana/config/certificates/kibana/kibana.crt
+#            SERVER_SSL_KEY: /etc/kibana/config/certificates/kibana/kibana.key
         volumes:
             - /home/ubuntu/environment/data/certificados/ca:/etc/kibana/config/certificates/ca
+#            - /home/ubuntu/environment/data/certificados/kibana:/etc/kibana/config/certificates/kibana
         
             
     cerebro:
