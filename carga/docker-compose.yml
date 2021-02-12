@@ -14,3 +14,4 @@ services:
         container_name: milogstash
         volumes:
             - ./logstash/apache-pipeline.conf:/usr/share/logstash/pipeline/apache-pipeline.conf
+            - /home/ubuntu/environment/data/certificados/ca/ca.crt:/usr/share/logstash/certs/ca/ca.crt
