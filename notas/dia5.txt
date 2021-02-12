@@ -1,0 +1,162 @@
+Asignación de shards a nodos
+-----------------------------
+                    CPU         MEMORIA         DISCO
+Master               xx            xx             xx
+Coordinadores        √             √              x
+Ingesta              √             x              xx
+Data                 √             √             √√√√    DEPENDE
+
+Los nodos data... usan sus discos propios, los que están metidos dentro de la caja
+NO. Que espacios de almacenamiento usan?
+    - Cabina fibre channel
+    - Nas
+    - Cloud
+Siempre es un almacenamiento externo.
+Características del almacenamiento externo:
+    - Redundante IMPORTANTISIMO
+    - Velocidad DEPENDE
+        +++ velocidad => €€€€€€€€€€
+
+Siempre necesito mucha velocidad de almacenamiento?
+    NO. Qué índices no necesitan nada de velocidad?
+        Los que estén cerrados. Aquí pongo un almacenamiento BARATO
+        ROL: DATA_COLD
+    Qué indices no necesitan mucha velocidad?
+        Los que están congelados. Aqui pongo un almacenamiento REGULAR
+        ROL: DATA_WARM
+    Qué indices necesitan mucha velocidad?
+        Los que están vivos. No congelados
+        ROL: DATA_HOT
+    Qué indices necesitan ultra velocidad?
+        Los que están vivos. No congelados.
+            Y que almacenan documentos que están vivos tambiñen. CRUD
+        ROL: DATA_CONTENT
+---------------------------------------------------
+Abierto
+    Lo puedo usar
+    Puedo leer? SI
+    Puedo escribir? DEPENDE
+        Si está congelado no
+Cerrado
+    No lo puedo usar
+    Ni leer ni escribir
+---------------------------------------------------
+Ejemplos de documentos que meto en un elastic?
+    - Logs          DATOS MUERTOS... Van a actualizarse? NO Solo añado
+    - Metricas
+-----------------------
+    - Datos custom. Facturas... documentos WORD
+        Pueden actualizarse?    DATOS VIVOS. Se actualzian
+
+
+Dentro de los nodos de datos, tendré distintas configuraciones:
+                            CPU         MEMORIA         DISCO ESPACIO    VELOCIDAD
+    ROL: DATA_COLD           x              x             √√√√√√√√          xxxx
+    ROL: DATA_WARM           √              √√             √√√√√√            √ 
+    ROL: DATA_HOT            √√√            √√              √√√             √√√√
+    ROL: DATA_CONTENT        √√√√           √√√             √√√√√           √√√√√√√
+
+
+En un DATA para que sirve la Memoria?
+    - Búsquedas... para que el índice (sus shards) no tengan que estar continuamente
+        subiendo y bajando del disco a la RAM
+    - Hacemos muchas búsquedas en logs?
+        Si, si ves errores... Y para ver si hay errores, que estoy haciendo?
+            Una búsqueda
+        Si estoy monitorizando?
+            - Cuandro de mando ---> búsqueda
+            - Mostrando en tiempo real los logs en una pantalla ---> búsqueda
+En un DATA para que sirve la CPU?
+    - Indexar
+    - Búsquedas
+    
+4Tbs HDD Interno --- 100€
+1 Tb SSD         --- 100€
+
+Precio x4 almacenamiento
+-------------------------------------
+Voy a tener cuidado cuando tengo un índice a ver donde coloco sus shards.
+Ubicación de los shards en elasticsearch. Cómo lo hago?
+- La configuración se hace para cada INDICE
+    Aunque la configuración inicial la haré en base a un template...
+    Esta configuración irá cambiando con el tiempo.
+-Formas de configurar la ubicación de los shards de un índice:
+    - index.routing.allocation.XXXXXXX._tier=ROLE_DATA
+        - index.routing.allocation.include._tier=data_content,data_hot
+        - index.routing.allocation.require._tier=data_hot
+        - index.routing.allocation.exclude._tier=data_hot
+        - index.routing.allocation.include._tier_preference=data_content,data_hot,data_warm
+        ESTA FORMA DE TRABAJAR, es relativamente nueva. Esto requiere haber
+            catalogado previamente los nodos data.
+            node.roles=data_warm,data_cold
+    - Otra forma de trabajar más tradicional:
+        - index.routing.allocation.include.<custom_prop>
+        - index.routing.allocation.require.<custom_prop>
+        - index.routing.allocation.exclude.<custom_prop>
+            Ejemplo:
+                index.routing.allocation.include.velocidad_almacenamiento=ALTA
+      A CADA NODO se le asignaba una valor de <custom_prop>
+            node.attr.<custom_prop>=<valor>
+            Ejemplo:
+                node.attr.velocidad_almacenamiento=ALTA
+                node.attr.espacio_almacenamiento=POCO
+----------------------------------
+Otras cosas con respecto a la ubicación de los data:
+    - index.unassigned.node_left.delayed_timeout=10m
+Cómo será ese tiempo?
+    -Alto o bajo??? DEPENDE
+        - Que pasa si tengo un índice con 10Gbs que no se usa pa na...
+            - Si se cae el nodo... quiero que se reubique rapidito? NO
+                - index.unassigned.node_left.delayed_timeout=180m
+        - Que pasa si tengo un Indice sobre el que estoy trabajando a fuego???
+                - index.unassigned.node_left.delayed_timeout=10s
+
+Otras configuraciones:
+    index.routing.allocation.total_shards_per_node
+    cluster.routing.allocation.total_shards_per_node
+    
+    Número simultaneo de shards del mismo índice que puede haber en una misma máquina
+    Es estática?
+        index.routing.allocation.total_shards_per_node
+        NO:
+            - Si tengo el índice abierto para escribir: POCAS
+            - Si tengo el índice cerrado para escribir: ME DA IGUAL => ALTO
+        
+        
+Objetivo de tener un índice con más shards?
+    Más capacidad de trabajo:
+        Poder hacer la búsqueda más rápida
+        Poder hacer la indexación más rápida
+    Redundancia
+    
+    
+Enciclopedia:
+    Tomos
+    
+Pero quien escribe en esos tomos?
+    Personas
+Cuantos tomos asigno por persona?
+    Tengo personas cojonudas, que saben escribir con las 2 manos... y pueden escribir 2 tomos a la vez
+        Pero si les pongo 3 tomos... cuantos pueden escribir a la vez? solo 2
+    Me sirve para algo la división en más tomos? NO
+            
+-----------------------------------------
+Cuantos data tenemos nosotros?
+------------
+Datos 1 - Velocidades estrella !!!!
+Datos 2 -
+    data_hot
+    custom attr: velocidad: alta
+------------
+Datos 3 - Baja velocidad !!! :(
+Datos 4
+    data_cold
+    custom attr: velocidad: baja
+------------
+Crear 3 indices
+    INDICE_HOY  => hot
+    INDICE_AYER => cold
+    INDICE_HOY2 => valocidad alta
+Para cada indice: 
+    Primarias: 4
+    Replicas: 1
