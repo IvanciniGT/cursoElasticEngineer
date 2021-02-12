@@ -54,6 +54,7 @@ instances:
         - localhost
       ip:
         - 127.0.0.1
+        - 172.31.2.238
         
 
     - name: ingesta2
@@ -62,6 +63,7 @@ instances:
         - localhost
       ip:
         - 127.0.0.1
+        - 172.31.2.238
         
 
     - name: coordinador1
