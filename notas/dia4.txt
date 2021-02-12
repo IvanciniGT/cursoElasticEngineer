@@ -1,0 +1,542 @@
+Lucene
+ - Indexar y buscar documentos
+
+Relación Elastic y Lucene
+    En elastic cada shard es un lucene
+
+Cuando creamos un indice, le decimos a elastic cuantos shards tiene... 
+    y el los crea y los reparte entre las maquinas del cluster.
+
+Cuando cargamos documento:
+    1 - Le mando el documento A un nodo el que sea del cluster
+            Ingesta  ------>  Indice A (doc1) y me garantices que al menos hay N Shards replica que lo anotaron
+    2 - Ingesta1 le pregunta al master donde debe ir doc1
+            El master le asigna al documento doc1 un shard, en base a 
+                nuestro algoritmo de Routing (CAMPO)
+    3 - Se lleva el doc al nodo donde está el shard primario... y desde ahí a sus replicas
+    4 - Elastic en cada shard (primario o replica) apunta que hay que indexar ese documento:
+            TRANSLOG: REGISTRO DE LOS DOC A INDEXAR EN UN SHARD
+                FICHERO. Para que sirve? En caso de falla.
+            LUCENE: Carga el documento en RAM en una cola
+    5 - Se le envía al usuario OK, confirmación síncrona, cuando al menos se ha guardado aquello en los 
+            shards requeridos por el usuario.
+    ---------------------
+En algún momento, Lucene indexará.
+Qué pasa cuando lucene indexa?
+    1 - Lucene tenía una cola de documentos
+    2 - Lucene indexa esa cola, es decir, les aplica 
+        El procedimiento de indexación que haya definido:
+            Parte las palabras...
+            Cambia el case....
+            Elimina plurales...
+        ¿Cuanto tarda esto? UN RATO....
+    3 - El producto de la indexación es UN INDICE INVERTIDO
+    4 - Qué se hace con esa información: En paralelo, lucene mantiene 2 estructuras independientes
+            - Se vuelva a ficheros de segmento... Se guardan a DISCO?
+                NO.... BUFFER EN RAM ---> FLUSH ----> Llevarlo a disco
+                                                            Aqui es cuando el documento desaparece
+                                                                del TRANSLOG
+            - Se consolida en RAM
+            
+----------------------------
+Podemos forzar que:
+    Se ha un indexado de los documentos a la RAM AHORA! _refresh
+        http://mielastic:9200/miindice1/_refresh
+    Puedo forzar un volcado de los ficheros de segmento del buffer al disco AHORA!! _flush
+        http://mielastic:9200/miindice1/_flush
+    
+Cual de estas operaciones es más pesada?
+    _flush
+Cúando me interesa un _refresh?
+    Cuando el docuemnto tenga que estár disponible tan pronto como lo cargo
+Cuando me interesa un _flush?
+    Cuando yo he desactivado previamente el flush automatico.
+    En que escenario interesa esto?
+        Cuando coy a hacer una CARGA MASIVA !!!
+    
+----------------------------
+Donde está la información en LUCENE:
+    Disco   <  Persistencia
+        Mediante ficheros llamados: Segmentos.
+        Cuantos segmentos hay: MOGOLLON !!!!!!
+        En esos segmentos, los datos están ordenados?
+            A trozos.
+        Los documentos que me vienen en el LOTE 1, los indexo, genero el indice invertido
+            y los guardo en el fichero de segmento 1
+        Los documentos que me vienen en el LOTE 2, los indexo, genero el indice invertido
+            y los guardo en el fichero de segmento 1... hasta que se llene
+            Cuando se llene, genero otro fichero de segmento 2
+            
+    RAM     <  Busquedas
+        Todos los ficheros de segmento CONSOLIDADOS en un INDICE 
+
+    
+
+Algoritmos de routing:
+    Tomar unos "campos que yo decido" (si no decido, se toma el ID)
+    y de esos campos genera un hash: Huella: NUMERO
+        Elastic se queda con el resto de la divisón entera del NUMERO (HASH) 
+        entre el numero de shards primarios.
+    
+        Si tengo la huella 23.
+        Y tengo 5 shards, donde va el documento???
+        
+        23/5=4 5*4=20 ---> 23 = 3
+        23%5=3
+        
+        Entre que valores va a estar el RESTO? 0-4
+        0-4 ---->  El shard donde voy a meter el documento
+---
+Nota: 
+El hash es una encripción del documento? NO
+Un valor unico que está asociado al contenido
+
+    HOLA
+    Coy a tomar la posicion de cada letra en el abecedario
+    H->8
+    O->17
+    L->12
+    A->1
+    
+    38 ese número es un id único? NO, varios docuemntos pueden tener la misma huella
+----
+
+
+PUT http://elastic:9200/indice
+{
+    documento
+}
+
+
+
+
+
+
+Indice facturas del Año 2017: 12 shards
+
+Donde van estas facturas??? A que shard van?
+    Factura1 -> CAMPO (mes) -> NUMERO % Total de shards = 1
+    Factura2 -> CAMPO (mes) -> NUMERO % Total de shards = 11
+    Factura3 -> CAMPO (mes) -> NUMERO % Total de shards = 0
+
+Depende? Que queries vas a hacer?
+         Como son las cargas de datos?
+        
+Si voy cargando facturas mensualmente?
+    En un mes , donde van todas las facturas: Al mismo shard
+    Donde se me ha quedado la paralelización?
+        ID, cliente, importe
+    
+
+Para que creaba yo shards primarios?  ESCALABILIDAD
+Quien me da la alta disponibilidad?   LAS REPLICAS
+
+
+
+
+1 - Hola amigo
+2 - Adios amigo
+3 - Hola personita
+--------
+4 - Hola amigo
+5 - Adios personita
+--------
+Fichero segmento 1:
+    -----
+    adios 2(1)
+    amigo 1(2) 2(2)
+    hola 1(1) 3(1)
+    personita 3(2)
+    -----
+    adios 5(1)
+    amigo 4(2)
+    hola  4(1)
+    personita 5(2)
+    -----
+RAM:
+    adios 2(1) 5(1)
+    amigo 1(2) 2(2) 4(2)
+    hola 1(1) 3(1) 4(1)
+    personita 3(2) 5(2)
+
+
+1000 mensajes por segundo:
+3.5 Millones a la hora, dia 90 millones de datos al dia
+Cuantos en un año?
+3000 millones de datos al año
+---------------------------------------
+_formemerge   <<<<< SOLO LOS HARE SOBRE INDICES DE SOLO LECTURA
+    Crear menos ficheros de segmento, fusionando ficheros.
+    Al reescribirse los ficheros de segmento, eliminar datos de documentos borrados.
+        Liberar espacio
+-----------
+Tengo 100 documentos cargados en un indice... en un shard
+Borro 5 documentos expresamente....
+Que impacto tiene esto?
+    Se borran los doucmentos (indice inverso) de los ficheros de segmentos?
+    NO, NUNCA JAMÁS
+    Solo se apunta que el documento no vale, se ha borrado
+Por qué?
+    Me obliga a reescribir el fichero de segmento.
+----------
+Si usamos elastic para monitorizar, no voy a borrar documentos nunca.
+Como mucho borraré un indice!
+--------------------
+indice Webservers Enero 2020    <   borralos 
+indice Febrero 2020
+indice Marzo 2020
+indice Abril 2020
+indice Mayo 2020
+indice Junio 2020
+-------------------
+Vamos a borrar indices si monitorizamos? Intentaremos que no
+    Rollover:
+        Generar desde los datos de un indice, otro indice con datos agregados
+---------------------
+Cuando estoy en Julio 2020, los datos de Julio del 2019 me dan igual...
+Pero lo que me da igual realmente es el DETALLE DE LOS DATOS.
+Pero si me pueden interesar:
+    Agregados:
+        Cuantas peticiones se hicieron en cada webserver por dia?
+        Cuantos errores hubo por dia?
+
+
+--------------------
+Indice de solo lectura: Cuando ya solo voy a hacer busquedas!
+_freeze
+_unfreeze
+-------------------- 
+Cerrar un índice: Cuando no voy a utilizar el indice para NADA, de NADA...
+                  Lo guardo por si acaso
+_close
+_open
+
+------
+Operaciones:
+_open           USABLE
+_close          NO USABLE
+_freeze         SOLO LECTURA
+_unfreeze       LECTURA Y ESCRITURA
+_forcemerge     AGRUPAR FICHEROS DE SEGMENTO. MEJORAR EL RENDIMIENTO
+_refresh        DOCUMENTOS RECIEN CARGADOS QUE YA ESTEN DISPONIBLES PARA BUSQUEDAS
+_flush          DOCUMENTOS RECIEN CARGADOS SE ASEGURE QUE ESTÁN EN DISCO
+_split          DIVIDIR SHARDS PRIMARIOS DE UN INDICE
+_shrink         AGRUPAR SHARDS PRIMARIOS DE UN INDICE
+
+Los indices siempre van asociados a FECHAS!
+----------
+Al crear un indice le asigno cuantos shards quiero:
+    - primarios
+    - de replica
+Se pueden cambiar esos datos en caliente?
+    - primarios:  NO
+    - de replica: SI
+Puede cambiar los primarios: Mediante operaciones:
+    _split 2 -> 4 o 8.... pero nunca 5
+    _shrink -> 8  ->  4... 2... pero nunca 6
+
+
+-----------------------------------------------------------------------
+Que cosas debo monitorizar con cuidado de un cluster de ES?
+    - Estado: VERDE.... AMARILLO
+        Amarillo: Shards desasignados... Cuando se cae un nodo... cuando no hay espacio en disco
+    - Carga:
+        - CPU nodos
+        - Disco?:
+            - Espacio
+            - Presión? # de Entradas/salidas
+        - Memoria   <<<<< COMPLEJO
+            Es complejo entender que está pasando y como mejorarlo.
+------------------------------------------------------------------------
+MEMORIA EN ES
+    ES Está desarrollado en JAVA.
+    Java es un lenguaje de programación de tipo: COMPILADO + INTERPRETADO
+        En java compilamos: javac ----> .class (BYTE CODE)
+        El byte code es dirctamente ejecutable por el SO?
+            NO, es interpretado en tiempo de ejecución por la JVM
+        JVM, que es una Máquina Virtual = Que si por ejemplo me creo una VM en virtualBox
+        Que configuro cuando creo una Maquina virtual?
+            - Memoria: A la JVM le voy a asignar una determinada memoria
+Si en el SO de base, veo que JVM tiene ocupados 2Gbs, eso significa que ES está usando 2Gbs?
+    NO. 
+    Elastic Search usará lo que necesite! Limitado a 2Gbs
+        Quizás un 1Gb, 1.5Gb
+        
+Yo voy a tener que monitorizar, no lo que tenga asignada la JVM, sino que dentro haya en uso.
+
+Que porcentaje de la RAM del host asigno a JVM?
+    Si tengo una máquina que tiene 16Gbs, cuando le puedo llegar a dar a JAVA?
+    Que tengo en el HOST:
+        SO:  Depende del ES? TOTALMENTE
+                Buffers de ficheros
+        JVM: Lo que tengo dentro es ES... Lo que necesite ES
+            Entre las cosas que hace y gestiona ES tenemos a los 
+            LUCENES:
+                Indices en RAM
+                Gestionar los Ficheros de segmentos
+            Cuantos Lucenes voya a tener en un Nodo ES?
+                 Tantos como shards... osea muchos
+            Cuantos ficheros tiene cada Lucene..... MOGOLLON
+                Quien se encarga de las operaciones de I/O contra ficheros: SO
+                Los buffers de I/O de los ficheros son gestionados por el SO...
+                Y necesiota un huevo de ememoria para ello
+    La recomendación en ES es que la RAM de la JVM esté en el entorno del 50-60% de la total.
+    
+    
+De la parte de RAM que usa ES.... donde está el grueso?
+    Los Indices de Lucene son los que se llevan la RAM
+
+Si tengo la RAM que se está llenando que opciones tengo?
+    X   No puedo usar disco como RAM ya que lo primero que hicimos fue desactivar el SWAP 
+            para no tener problemas de rendimiento
+        
+    X   Reiniciar.... Que consigo con esto?
+            Que los indices que están cargados en RAM se borren de RAM...
+            Esto es solución? PAN PARA HOY Y HAMBRE PARA MAÑANA
+            En cuando se empiecen a usar los indices... otra vez que van a RAM.
+            Como salida rápida, mejor hacer un _clearcache de un indice:
+                Quita el indice de la RAM
+
+Si la RAM se peta.... que va a pasar? 
+    ES intentará liberarla...  Yo tengo 4Gbs de RAM en ES
+        Indice1 que ocupa 2Gbs
+        Indice2 que ocupa 3Gbs
+    
+        En esta situación, cuando haga una búsqueda en Indice1, lo cargará a RAM
+        En esta situación, cuando haga una búsqueda en Indice2, lo cargará a RAM
+            pero para ello tendrá que borrar primero el 1.... 
+            
+        HE DESTROZADO TOTALMENTE EL RENDIMIENTO. ESTO ES LO PERO QUE ME PUEDE PASAR
+    
+    pero llegará un momento en que no pueda. 
+        Si tengo 4Gbs... pero:
+            Indice1 crece hasta 5Gbs.... Upsss!!!!
+
+Soluciones:
+    - Eliminar indices?
+        Es esto solución? Depende... si no quiero los datos, vale...
+        pero y si los necesito? NO ME VALE
+    - Congelar: Esto solo lo marca en SOLO LECTURA... no me ayuda... RUINA !!!!
+    - Aumentar la RAM
+        Esto es solución? Si.... mientras pueda aumentar la RAM. GUAY... pero con un límite.
+    - Split: 
+        Los shards se hacen más pequeños... y se pueden repartir entre más maquinas.
+        Yo me quedo solo con la mitad... y enchufo la otra mitad a otra máquina.
+        Es solución: GUAY !!! Siempre que tenga más máquinas.
+
+¿Que interesa más, subir RAM o particionar?
+    Particionar     √√
+    RAM             √
+    
+Particionar... me PUEDE afectar al rendimiento de las búsquedas... DEPENDE DE LAS BUSQUEDAS
+    Como puedo controlar que las búsquedas trabajen solo sobre 1 shard?
+        Routing me ayuda... tengo que conocer las búsquedas que se hacen.
+        
+
+A priori siempre me interesa subir RAM, por que?
+    En computo general voy a usar menos RAM
+
+ESCENARIO 1
+    Maquina 1: JVM 4Gbs
+        Indice 1
+            Shard 1 4Gbs
+
+Lo divido en 2 shards: NI DE COÑA SE REPARTE ASI LA RAM
+ESCENARIO 2
+    Maquina 1: JVM 4Gbs
+        Indice 1
+            Shard 1 2.5Gbs
+    
+    Maquina 2: JVM 4Gbs
+        Indice 1
+            Shard 2 2.5Gbs
+Un Shard que ocupa 4Gbs, al dividirse va a ocupar... no se... 5, 6, 7? NO SE
+    PERO MUCHO DE 4
+Porque?
+
+Tengo que saber los que hay en el shard: 
+    Indice invertido
+        Términos y ubicaciones
+
+Que pasa cuando divido un shard... que estoy repartiendo realmente?
+    Las ubicaciones... SI
+    los términos los divido? quizá alguno... pero en general NO
+
+Ventas de una web:
+    zapatillas     1  4  2   6   19
+    radio          7 6 9 87 56
+    coche          2 34 65 34 12
+    moto           1 2 3 4 5 6
+Si lo divido en 2 shards:
+
+Shard1
+    zapatillas     1  4  
+    radio          7 6 9 
+    coche          2 34 
+    moto           1 2 3 
+
+Shard2
+    zapatillas     2   6   19
+    radio          87 56
+    coche          65 34 12
+    moto           4 5 6
+
+Los términos se empiezan a duplicar entre los shards
+
+
+A priori me interesa más RAM
+Pero.... que ventaja me da tener más shards primarios particionados?
+    Más paralelización en carga o búsqueda? EN LAS 2
+Pero.... que ventaja me da tener más shards replica?
+    Más paralelización en carga o búsqueda? EN BUSQUEDA
+
+--------------------------------------------------------------------
+Indice que tiene dentro una Enciplopedia:
+    Shards primarios:  Tomos
+    Shards de replica: Copias de los tomos
+    
+Si quiero buscar la palabra JAMON? en cuantos tomos sultaneamente la puedo buscar?
+    En su tomo y en todas las copias que tenga de ese tomo
+    Puedo buscar en CUALQUIERA
+
+Si quiero escribir una palabra nueva? NO , ya que lo tengo que escribir en TODOS y cada uno
+--------------------------------------
+
+Que pasa cuando tengo un indice de solo lectura
+Que me interesa... Muchas shards primarios o pocos?
+    CUANTOS MENOS MEJOR... más rápidas irán las búsquedas.
+    Que me limita? La RAM... cuantas menos particiones, más RAM necesita cada partición
+    Lo mejor sería conseguir una sola partición
+-------------
+Si tengo el indice abierto, me interesa tener varios primarios.
+Según se vaya usando mñas y más el indice para escribir en él, tendré que irlo partiendo en más primarios
+-------------
+Si tengo el indice en solo lectura, me interesan cuantos menos primarios
+-------------
+Tienes una segunda limiitación, que es la CPU
+
+
+
+
+
+
+
+
+Clusters De Elastic 
+    Cluster 1     |
+    Cluster 2      >     Cluster de monitorización
+    Cluster 3     |
+    
+    
+Monitoring mediante ELK
+-------------------------
+Agentes beats:
+
+Filebeat     |
+Metricbeat   |     Logstash     >>>    ElasticSearch    <<<<      Kibana (monitorización)
+AuditBeat    |
+Heartbet     |
+
+
+
+Ventana Busqueda: Kibana
+Cuadro de mando:  Kibana
+    
+    Desactive un INDICE? Cerrar un índice
+
+
+------------------------------------------------
+Alias de los indices
+
+WebServersApache_Enero_2021   ---> monitorizacion_ws_enero_2020
+WebServersNginx_Febrero_2020  ---> monitorizacion_ws_nenero_2020
+BBDDOracle_Marzo_2020         ---> monitorizacion_oracle_enero_2020
+
+
+PCS_Empleados     ---> seguridad_1
+Servidores
+Portatiles
+
+1º Cuando trabajamos en búsquedas (Cuadro de mando, canvas)
+    Podemos usar caracteres comodin
+    
+    http://mielastic:9200/WebServers_*/_doc   <<<< Cuadro de mando
+
+    http://mielastic:9200/monitorizacion*_2020/_doc   <<<< Cuadro de mando: tipo: ERROR
+
+    
+58Gbs
+12Gbs ubicaciones
+46Gbs terminos
+
+2 x 29Kbs
+
+2x46 + 58-46
+92Gb + 12Gbs = 104 bs
+
+
+
+Cuantos más segmentos , cuando cargo en RAM, peor rendimiento
+
+
+
+Monitorizar un servidor WEB
+    apache.log
+    weblogic.log        >>>>> Fluend (JSON) >>> ELASTIC 
+                                                
+                                                IndicesFecha
+                                                Cómo son esos indices?
+                                                Cómo se guarda cada campo?
+                                                
+                                                Mappings? Indice
+                                                    Quien sea que haya montado el Fluend
+                                                    Si no lo hago que pasa?
+                                                        ES indexa como le da la gana.... RUINA !!!
+                                                        Cuantas particiones? 4
+                                                        Cuantas replicas?    1
+                                                            Que sea lo que dios quiera!!!
+                                                        Cuando el indice pasea solo lectura
+                                                        Cuantas particiones? 1
+                                                        Cuantas replicas?    3
+                                                        ---
+                                                        Cuantas particiones? 1
+                                                        Cuantas replicas?    1
+Cada cuanto creo un índice     Un índice al día??? 
+    Esto no tiene sentido... algo se me escapa? como podré hacerlo?
+    
+    PLANTILLAS DE INDICES
+        Todos los indices que se creen, cuyo nombre sea: Webserver*
+        Quiero que:
+            - Tengan esta configuración (primarios, replicas)
+            - Tengan esta politica
+            - Tengan estos mappings.....
+                                                        
+                                                    
+Nodos de datos que están a reventar.....
+Que les puede pasar?
+Cual es su trabajo?
+    - Indexar
+    - Guardar los shards?
+        - Memoria
+        - Disco
+    - busquedas en los shards
+        ---> Más data
+    
+    - Consolidar busquedas CPU+RAM en ausencia de Coordinador ---> Mas nodos coordinares
+    - Preparación de datos en ausencia de Ingest  ----> Mas nodos ingesta
+    
+    
+Si en un DATA los indices no ocupan tanto como tengo de la memoria en uso en JAVA
+Data tengo en uso 800Mb de RAM
+    Pelos los shards de esa data ocupan en RAM solo 100Mbs
+    
+Donde están los otros 700????? Para que se están usando???
+Que la memoria no se usa solo para shards.... Coordinación
+
+
+Cuando hago una busqueda en un indice... esa busqueda se reparte en varios shards
+
+Pero luego hay que tomarlo todo junto y consolidarlo... RAM 
+
+
+O bien que hago demasiadas busquedas  mias propias, o bien que me como mucho trabajo de ingesta

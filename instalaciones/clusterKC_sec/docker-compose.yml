@@ -250,6 +250,7 @@ services:
             - /home/ubuntu/environment/data/nodo7:/usr/share/elasticsearch/data
             - /home/ubuntu/environment/data/certificados/ca:/usr/share/elasticsearch/config/certificates/ca
             - /home/ubuntu/environment/data/certificados/coordinador1:/usr/share/elasticsearch/config/certificates/nodo
+            - ./coordinador1.conf.yml:/usr/share/elasticsearch/config/elasticsearch.yml
 
 
     coordinador2:
@@ -283,6 +284,7 @@ services:
             - /home/ubuntu/environment/data/nodo8:/usr/share/elasticsearch/data
             - /home/ubuntu/environment/data/certificados/ca:/usr/share/elasticsearch/config/certificates/ca
             - /home/ubuntu/environment/data/certificados/coordinador2:/usr/share/elasticsearch/config/certificates/nodo
+            - ./coordinador2.conf.yml:/usr/share/elasticsearch/config/elasticsearch.yml
 
 
     ingesta1:

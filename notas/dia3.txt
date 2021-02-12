@@ -1,0 +1,63 @@
+HTTP >>> HTTPs
+
+    Capa SSL
+    
+Qué me ofrece SSL (HTTPs):
+    Gano en seguridad? En qué?
+        SSL Me permite evitar 2 tipos de ataques?
+            Man in the middle << Https NO EVITA ESTOS ATAQUES... los frustra. Cómo?
+                Los datos se mandan encriptados
+                    Tipos de algoritmos de encriptación que existen en la informática?
+                        - Clave simetrica: Con la misma clave cifro y descifro           SON MUY RAPIDOS
+                        - Clave asimetrica: Con una clave cifro y y con otra descifro    SON MAS LENTOS
+                                                CLAVE PRIVADA      -    CLAVE PUBLICA
+                HTTPS FUNCIONA CON AMBAS !!!!!
+                        
+            Suplantación de identidad: El servidor no es quien dice ser...
+                Certificado: DNI, Carnet de conducir
+                    - Quien soy yo
+                    - Mi clave publica
+                    - Quien es el productor del Certificado: CA
+                    - Firma de la CA: Mi nombre + mi clave + nombre CA => Huella (hash) y esa huella, la CA la encripta con su clave privada
+                    
+Donde pongo esos certificados???
+    √ Coordinadores <<< La comunicación entre Kibana (cualquier cliente de consulta) y Elastic sea segura... en el sentido de ariba
+    √ Ingesta <<< Los datos que se metan se metan en mi elastic... y no otro sitio
+    He securizado las entradas y salidas .... LISTO
+    Comentario: El resto ya es confiable... por que? red interna.... 
+        la red interna es confiable? NI DE COÑA!!!!
+            Cual es principal peligro de la red interna? VOSOTROS <<<<<< PRINCIPAL HUECO PARA ATAQUES... EL MAS USADO
+    
+    ¿Que quiero securizar? TODO
+
+        Entradas y salidas: 9200                    - SSL 1: Solo el servidor presenta certificado . Autenticación cliente: Usuario/password
+            Coordinadoes /Datas >>>> Kibana, Clientes varios
+            Ingesta, Datas      <<<< Logstash, Betas, Fluentd
+            
+        Toda la comunicación interna! : 9300       - SSL 2: Tanto cliente como servidor presentan certificado. Autenticación de los 2 sevidores: CERTIFICADOS
+        
+Pasos:
+    Generar claves privadas
+    Crear certificados, para quien? TODO PERRO PICHICHI
+    Configurar en docker-compose el puerto 9200
+        que quiero https
+        SSL1<<< por defecto
+        certificado que voy a usar
+        dar de alta CA
+        mi clave privada
+    Configurar en docker-compose el puerto 9300
+        que quiero https
+        SSL2
+        certificado que voy a usar
+        dar de alta CA
+        mi clave privada
+    Cuando los servidores empiecen a establecer el cluster... al haber certiicados de por medio... aquello va a tardar...
+        Corremos riesgo de que se produzcan timeouts
+        Ampliar los timeouts de las comunicaciones
+    Decir a todos los nodos que confien en mi CA
+    
+Quién firma mis certificados?
+    Vamos a generar nuestra propia CA
+
+Cuando el data1 le mande el certificado al maestro1... se lo va a tragar lo que pone en el certificado?
+    Solo si quien lo firma le inspira confianza
