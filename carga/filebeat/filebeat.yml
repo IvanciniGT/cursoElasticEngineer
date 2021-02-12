@@ -1,0 +1,7 @@
+filebeat.inputs:
+- type: log
+  paths: 
+    - /tmp/datos.log
+    
+output.logstash:
+    hosts: ["milogstash:5045"]

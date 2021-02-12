@@ -160,3 +160,23 @@ Crear 3 indices
 Para cada indice: 
     Primarias: 4
     Replicas: 1
+    
+    
+--------------------------------------------------------
+Introducción al Stack ELK
+    Mappings
+    Templates
+...........................
+Servidor web
+    datos.log ---> Transformar en JSON cada linea
+
+Filebeat
+    Empieza leyendo el fichero... Y a partir de ahñi, va leyendo cada nueva linea
+    Cada linea del fichero la va a mandar a Logstash
+
+Logstash 
+    Va a recibir lineas de Filebeat
+    Transformar cada linea a JSON
+    Mandalo a Elasticsearch
+    
+Cluster de ES

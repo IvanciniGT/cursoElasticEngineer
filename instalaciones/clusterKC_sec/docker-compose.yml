@@ -303,6 +303,8 @@ services:
     ingesta1:
         container_name: ingesta1
         image: elasticsearch:7.10.1
+        ports:
+            - 9200:9200
         environment:
             - node.name=ingesta1
             - cluster.name=Cluster
@@ -338,6 +340,8 @@ services:
     ingesta2:
         container_name: ingesta2
         image: elasticsearch:7.10.1
+        ports:
+            - 9201:9200
         environment:
             - node.name=ingesta2
             - cluster.name=Cluster
